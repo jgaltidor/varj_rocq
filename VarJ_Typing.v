@@ -61,7 +61,7 @@ Inductive sift (E:Type) : list E -> list typ -> list tname ->
                (exists y, In y ys /\ In y (fv_t u)) ->
                (forall y, In y ys /\ In y (fv_t u) -> var_t y u invar) ->
                sift E es us ys es' us' ->
-               sift E (cons e es) (cons u us) ys (cons e es') (cons u us')
+               sift E (e::es) (u::us) ys (e::es') (u::us')
 
 | sift_skip_var : forall e es u us ys es' us' v,
                     (exists y, In y ys /\
@@ -69,12 +69,12 @@ Inductive sift (E:Type) : list E -> list typ -> list tname ->
                                var_t y u v /\
                                v <> invar) ->
                     sift E es us ys es' us' ->
-                    sift E (cons e es) (cons u us) ys es' us'
+                    sift E (e::es) (u::us) ys es' us'
 
 | sift_skip_novar : forall e es u us ys es' us',
                       (forall y, In y ys -> ~(In y (fv_t u))) ->
                       sift E es us ys es' us' ->
-                      sift E (cons e es) (cons u us) ys es' us'.
+                      sift E (e::es) (u::us) ys es' us'.
 
 
 Definition matching (ns: list typ_n) (us: list typ) (ps: list typ_p)

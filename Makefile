@@ -9,6 +9,7 @@ all:
 	coqc VarJ_Subtyping.v
 	coqc VarJ_Wellform.v
 	coqc VarJ_Typing.v
+	coqc VarJ_Reduction.v
 
 clean:
 	rm *.glob *.vo

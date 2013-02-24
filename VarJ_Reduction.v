@@ -5,6 +5,7 @@ Require Import VarJ_Substitution.
 Require Import VarJ_Subtyping.
 Require Import VarJ_Lookup.
 Require Import VarJ_Wellform.
+Require Import VarJ_Typing.
 
 Fixpoint getNTypes_exps (es:list exp) : list typ_n :=
   match es with
@@ -27,7 +28,8 @@ Inductive step : exp -> exp -> Prop :=
       (* --------------------------------------------- *)
             step (e_field (e_new (n_typ C ts) es) f) v
 
-| r_invk : forall e m ps es,
+| r_invk : forall N es' m Ps es e_0 Ts methBnds Us U Ns' Us' L,
+           (forall e, In e es' -> value e) ->
            (forall e, In e es -> value e) ->
            mbody m N e_0 ->
            mtype m N (methBnds, Us, U) ->
@@ -38,10 +40,10 @@ Inductive step : exp -> exp -> Prop :=
               sift typ_n Ns Us_open Ys Ns' Us' /\
               matching Ns' Us' Ps Ys Ts) ->
      (* ---------------------------------------------------------- *)
-           step ((e_new N es') m Ps es)
+           step (e_minvk (e_new N es') m Ps es)
                 (let e_0_v  := open_e 0 e_0 es in
                  let e_0_vt := open_e_t 0 e_0_v Ts in
-                 (subst_e (e_fvar this) (e_new N es') e_0_vt))
+                 (subst_e (this::nil) ((e_new N es')::nil) e_0_vt))
 
 
 (* Congruence Rules *)

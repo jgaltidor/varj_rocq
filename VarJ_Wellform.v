@@ -59,15 +59,15 @@ with ok_cxt_t : cxt_t -> cxt_t -> Prop :=
 | ok_cxt_t_cons: forall tcxt x b_low t_up tcxt'
                         b_low_ubound t_up_ubound,
                   no_binds x tcxt ->
-                  let entireCxt := (tcxt ++ (cons (x, (b_low, t_up)) tcxt')) in
+                  let entireCxt := (tcxt ++ ((x, (b_low, t_up))::tcxt')) in
                   ok_b entireCxt b_low ->
                   ok_t entireCxt t_up ->
                   ubound_b tcxt b_low b_low_ubound ->
                   ubound_t tcxt t_up  t_up_ubound ->
                   subtype_b tcxt b_low_ubound (b_typ t_up_ubound) ->
                   subtype_b tcxt b_low (b_typ t_up) ->
-                  ok_cxt_t (tcxt ++ (cons (x, (b_low, t_up)) nil)) tcxt' ->
-                  ok_cxt_t tcxt (cons (x, (b_low, t_up)) tcxt').
+                  ok_cxt_t (tcxt ++ ((x, (b_low, t_up))::nil)) tcxt' ->
+                  ok_cxt_t tcxt ((x, (b_low, t_up)) :: tcxt').
 
 Inductive ok_p : cxt_t -> typ_p -> Prop :=
 | ok_p_inf : forall tcxt, ok_p tcxt p_inf
@@ -83,5 +83,5 @@ Inductive ok_cxt_e : cxt_t -> cxt_e -> Prop :=
                   no_binds x ecxt ->
                   ok_t tcxt t ->
                   ok_cxt_e tcxt ecxt ->
-                  ok_cxt_e tcxt (cons (x, t) ecxt).
+                  ok_cxt_e tcxt ((x, t)::ecxt).
 

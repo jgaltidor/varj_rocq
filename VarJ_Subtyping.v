@@ -164,14 +164,14 @@ Inductive var_meet_list : list variance -> variance -> Prop :=
 | var_meet_list_cons : forall v1 vs v2 v3,
                        var_meet_list vs v2 ->
                        var_meet v1 v2 v3 ->
-                       var_meet_list (cons v1 vs) v3.
+                       var_meet_list (v1::vs) v3.
 
 Inductive var_join_list : list variance -> variance -> Prop :=
 | var_join_list_nil  : var_join_list nil invar
 | var_join_list_cons : forall v1 vs v2 v3,
                        var_join_list vs v2 ->
                        var_join v1 v2 v3 ->
-                       var_join_list (cons v1 vs) v3.
+                       var_join_list (v1::vs) v3.
 
 
 Inductive var_t : tname -> typ -> variance -> Prop :=
@@ -220,7 +220,7 @@ with var_t_bounds : tname -> t_bounds -> variance -> Prop :=
                       var_t_bound X tbnd v1 ->
                       var_t_bounds X tbnds v2 ->
                       var_meet v1 v2 v ->
-                      var_t_bounds X (cons tbnd tbnds) v.
+                      var_t_bounds X (tbnd::tbnds) v.
 
 
 Inductive vars_t : list tname -> typ -> list variance -> Prop :=
@@ -229,7 +229,7 @@ Inductive vars_t : list tname -> typ -> list variance -> Prop :=
 | vars_t_cons : forall t x xs v vs,
                 vars_t xs t vs ->
                 var_t x t v ->
-                vars_t (cons x xs) t (cons v vs).
+                vars_t (x::xs) t (v::vs).
 
 
 Example var_neq_ex : invar <> covar.
