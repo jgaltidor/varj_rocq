@@ -184,6 +184,9 @@ Definition methdef_name (md:methdef) : mname :=
 Definition methdefs_names (mds:methdefs) : (list mname) :=
   List.map methdef_name mds.
 
+Definition methdef_msig (md:methdef) : msig :=
+  match md with (_, (tbnds, t, ts, _)) => (tbnds, ts, t) end.
+
 Definition cxt_t_entry_name (entry:tname * t_bound) : tname :=
   let (name, bnd) := entry in name.
 

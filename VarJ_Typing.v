@@ -130,7 +130,7 @@ Inductive typing : cxt_t -> cxt_e -> exp -> typ -> cxt_t -> Prop :=
                   (exists U tbnds,
                      (forall xs,
                         distinct L (length tbnds) xs ->
-                        let tcxt' := (openToCtxt_tbounds xs tbnds) in
+                        let tcxt' := openToCtxt_tbounds 0 xs tbnds in
                         typing tcxt ecxt e U tcxt' /\
                         subtype_t (tcxt ++ tcxt') U T /\
                         ok_cxt_t tcxt tcxt')) ->
@@ -189,6 +189,69 @@ Inductive typing : cxt_t -> cxt_e -> exp -> typ -> cxt_t -> Prop :=
                    subtype_t tcxt'' T_i Targ_i) ->
         (* -------------------------------------------------------------------------- *)
                 typing tcxt ecxt (e_minvk e m Ps es) (open_t 0 U Ts)
-                                                    (tcxt' ++ (flatten tcxts)).
+                                                     (tcxt' ++ (flatten tcxts)).
 
+
+(* Override Check *)
+
+Inductive override : mname -> typ_n -> msig -> Prop :=
+
+| over_def : forall m N sig,
+             mtype m N sig ->
+             override m N sig
+
+| over_undef : forall m C ts sig mds,
+               methods C mds ->
+               no_binds m mds ->
+               override m (n_typ C ts) sig.
+
+
+Inductive method_typing : cxt_t -> methdef -> cname -> Prop :=
+| w_meth : forall clsCxt m methBnds T Ts e C clsTVBnds
+                  N fds mds L_bnds L_body,
+           binds C (C, clsTVBnds, N, fds, mds) CT ->
+           override m N (methBnds, Ts, T) ->
+           let clsVars := tvbounds_vars clsTVBnds in
+           let clsVarsNegated := negateVars clsVars in
+           let Xs := dom clsCxt in
+           mono_t clsVars Xs T ->
+           (forall T_i, In T_i Ts -> mono_t clsVarsNegated Xs T_i) ->
+           mono_t_bounds clsVarsNegated Xs methBnds  ->
+           (forall Ys,
+              distinct L_bnds (length methBnds) Ys ->
+              let methCxt  := openToCtxt_tbounds 0 Ys methBnds in
+              let Ts_open  := open_ts_with_names 0 Ts Ys in
+              let T_open   := open_t_with_names 0 T Ys in
+              let tcxt     := clsCxt ++ methCxt in
+              ok_cxt_t clsCxt methCxt /\
+              ok_t tcxt T_open /\
+              (forall T_i, In T_i Ts_open -> ok_t tcxt T_i) /\
+              (forall xs,
+                 distinct (this::L_body) (length Ts) xs ->
+                 let X_typs   := List.map (fun X => t_fvar X) Xs in
+                 let thisTyp  := t_ext nil (n_typ C X_typs) in
+                 let ecxt     := (this, thisTyp) :: (combine xs Ts) in
+                 typing tcxt ecxt e T nil)) ->
+           method_typing clsCxt (m, (methBnds, T, Ts, e)) C.
+
+
+Inductive class_typing : classdef -> Prop :=
+| w_cls : forall C tvbnds N fds mds L,
+            (forall Xs,
+               distinct L (length tvbnds) Xs ->
+               let N_open := open_n_with_names 0 N Xs in
+               let Ts_open := (* field types *)
+                 List.map
+                   (fun (fd:fielddef) =>
+                      let (f, T) := fd in open_t_with_names 0 T Xs)
+                   fds
+               in
+               let tcxt := openToCtxt_tvbounds 0 Xs tvbnds in
+               let clsVars := tvbounds_vars tvbnds in
+               mono_n clsVars Xs N_open /\
+               (forall T_i, In T_i Ts_open -> mono_t clsVars Xs T_i) /\
+               ok_n tcxt N_open /\
+               (forall T_i, In T_i Ts_open -> ok_t tcxt T_i) /\
+               (forall md, In md mds -> method_typing tcxt md C)) ->
+            class_typing (C, tvbnds, N, fds, mds).
 

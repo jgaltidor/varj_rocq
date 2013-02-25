@@ -5,8 +5,8 @@ Require Import VarJ_Substitution.
 
 Inductive fields : cname -> fielddefs -> Prop :=
 | fields_obj : fields Object nil
-| fields_super : forall C D tvbnds ts fds fds' ms, 
-    binds C (C, tvbnds, (n_typ D ts), fds, ms) CT ->
+| fields_super : forall C D tvbnds ts fds fds' mds, 
+    binds C (C, tvbnds, (n_typ D ts), fds, mds) CT ->
     fields D fds' ->
     fields C (fds' ++ fds).
 
@@ -30,8 +30,13 @@ Inductive ftype : fname -> typ_n -> typ -> Prop :=
 
 (** Method lookup *)
 
-Definition methdef_msig (md:methdef) : msig :=
-  match md with (_, (tbnds, t, ts, _)) => (tbnds, ts, t) end.
+Inductive methods : cname -> methdefs -> Prop :=
+| methods_obj : methods Object nil
+| methods_super : forall C D tvbnds ts fds mds mds', 
+    binds C (C, tvbnds, (n_typ D ts), fds, mds) CT ->
+    methods D mds' ->
+    methods C (mds' ++ mds).
+
 
 Inductive mtype : mname -> typ_n -> msig -> Prop :=
 | mtype_class :

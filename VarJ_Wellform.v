@@ -28,10 +28,10 @@ Inductive ok_t : cxt_t -> typ -> Prop :=
 | ok_t_ext : forall tcxt tbnds N L,
              (forall xs,
                 distinct L (length tbnds) xs ->
-                let tcxt' := (openToCtxt_tbounds xs tbnds) in
+                let tcxt' := (openToCtxt_tbounds 0 xs tbnds) in
                 let N'    := (open_n_with_names 0 N xs) in
                 ok_cxt_t tcxt tcxt' /\ ok_n (tcxt ++ tcxt') N') ->
-       (* ------------------------------------------------ *)
+       (* ---------------------------------------------------------- *)
              ok_t tcxt (t_ext tbnds N)
 
 with ok_n : cxt_t -> typ_n -> Prop :=

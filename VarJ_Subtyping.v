@@ -42,24 +42,24 @@ with subtype_t : cxt_t -> typ -> typ -> Prop :=
 | subtype_t_n_left : forall tcxt tbnds N N' L,
                 (forall xs,
                    distinct L (length tbnds) xs ->
-                   let tcxt' := (openToCtxt_tbounds xs tbnds) in
+                   let tcxt' := openToCtxt_tbounds 0 xs tbnds in
                    subtype_n (tcxt ++ tcxt') N N') ->
                 subtype_t tcxt (t_ext tbnds N) (t_ext nil N')
 
 | subtype_t_n_right : forall tcxt tbnds' N N' L,
                 (forall xs,
                    distinct L (length tbnds') xs ->
-                   let tcxt' := (openToCtxt_tbounds xs tbnds') in
+                   let tcxt' := openToCtxt_tbounds 0 xs tbnds' in
                    subtype_n (tcxt ++ tcxt') N N') ->
                 subtype_t tcxt (t_ext nil N) (t_ext tbnds' N')
 
 | subtype_t_pack : forall tcxt tbnds tbnds' N ts L,
                      (forall xs,
                         distinct L (length tbnds') xs ->
-                        let tcxt' := (openToCtxt_tbounds xs tbnds') in
+                        let tcxt' := openToCtxt_tbounds 0 xs tbnds' in
                         (* Need to open ts because they contain binders in tbnds' *)
-                        let ts' := (open_ts_with_names 0 ts xs) in
-                        let tbnds_opened := (open_t_bounds 0 tbnds ts') in
+                        let ts' := open_ts_with_names 0 ts xs in
+                        let tbnds_opened := open_t_bounds 0 tbnds ts' in
                         (forall t' b_low t_up,
                            In (t', (b_low, t_up)) (combine ts' tbnds_opened) ->
                            subtype_b (tcxt ++ tcxt') b_low  (b_typ t') /\
@@ -125,7 +125,7 @@ Reserved Notation "v1 '<' v2" (at level 70, no associativity).
 Notation "v1 '<' v2" := (var_lt v1 v2).
 
 
-Definition var_leq (v1 v2: variance) := (v1 < v2) \/ (v1 = v2).
+Definition var_leq (v1 v2: variance) : Prop := (v1 < v2) \/ (v1 = v2).
 Reserved Notation "v1 '<=' v2" (at level 70, no associativity).
 Notation "v1 '<=' v2" := (var_leq v1 v2).
 
@@ -232,6 +232,134 @@ Inductive vars_t : list tname -> typ -> list variance -> Prop :=
                 vars_t (x::xs) t (v::vs).
 
 
+Definition var_transform_op (v1:variance) (v2:variance) : variance :=
+  match v1 with
+    | bivar => bivar
+    | invar =>
+        match v2 with
+          | bivar => bivar
+          | _ => invar
+        end
+    | covar => v2
+    | contravar =>
+        match v2 with
+          | covar => contravar
+          | contravar => covar
+          | _ => v2
+        end
+    end.
+
+
+Definition var_join_op (v1:variance) (v2:variance) : variance :=
+  match v1 with
+    | bivar => bivar
+    | invar => v2
+    | covar =>
+        match v2 with
+          | bivar => bivar
+          | contravar => bivar
+          | covar => covar
+          | invar => covar
+        end
+    | contravar =>
+        match v2 with
+          | bivar => bivar
+          | covar => bivar
+          | contravar => contravar
+          | invar => contravar
+        end
+    end.
+
+
+Definition var_meet_op (v1:variance) (v2:variance) : variance :=
+  match v1 with
+    | bivar => v1
+    | invar => invar
+    | covar =>
+        match v2 with
+          | covar => covar
+          | bivar => covar
+          | contravar => invar
+          | invar => invar
+        end
+    | contravar =>
+        match v2 with
+          | contravar => contravar
+          | bivar => contravar
+          | covar => invar
+          | invar => invar
+        end
+    end.
+
+Definition var_lt_op (v1:variance) (v2:variance) : bool :=
+  match v1 with
+    | bivar => false
+    | invar =>
+        match v2 with
+          | invar => false
+          | _ => true
+        end
+    | covar =>
+        match v2 with
+          | bivar => true
+          | _ => false
+        end
+    | contravar =>
+        match v2 with
+          | bivar => true
+          | _ => false
+        end
+    end.
+
+Definition negateVar (v: variance) : variance :=
+  var_transform_op contravar v.
+
+Definition negateVars (vs: list variance) : list variance :=
+  List.map negateVar vs.
+
+
+Definition var_meet_list_op (vs: list variance) : variance :=
+  List.fold_left var_meet_op vs bivar.
+
+Definition var_join_list_op (vs: list variance) : variance :=
+  List.fold_left var_join_op vs invar.
+
+
+Definition mono_t (vs: list variance) (xs: list tname) (t: typ) : Prop :=
+  forall v x w,
+  In (v, x) (combine vs xs) ->
+  var_t x t w ->
+  var_leq v w.
+
+
+Definition mono_n (vs: list variance) (xs: list tname) (n: typ_n) : Prop :=
+  forall v x w,
+  In (v, x) (combine vs xs) ->
+  var_n x n w ->
+  var_leq v w.
+
+Definition mono_b (vs: list variance) (xs: list tname) (b: typ_b) : Prop :=
+  match b with
+    | b_typ t => mono_t vs xs t
+    | b_bot => True
+  end.
+
+Definition mono_p (vs: list variance) (xs: list tname) (p: typ_p) : Prop :=
+  match p with
+    | p_typ t => mono_t vs xs t
+    | p_bot => True
+  end.
+
+Definition mono_t_bound (vs: list variance) (xs: list tname) (tbnd: t_bound) : Prop :=
+  forall v x w,
+  In (v, x) (combine vs xs) ->
+  var_t_bound x tbnd w ->
+  var_leq v w.
+
+Definition mono_t_bounds (vs: list variance) (xs: list tname) (tbnds: t_bounds) : Prop :=
+  forall tbnd, In tbnd tbnds -> mono_t_bound vs xs tbnd.
+
+
 Example var_neq_ex : invar <> covar.
 Proof.
   discriminate.
@@ -265,7 +393,7 @@ Proof.
 Qed.
 
 
-Lemma var_le_trans : forall (v1 v2 v3:variance), v1 <= v2 -> v2 <= v3 -> v1 = v3.
-Proof.
-Admitted.
+(*
+Lemma var_le_trans : forall (v1 v2 v3:variance), v1 <= v2 -> v2 <= v3 -> v1 <= v3.
+*)
 

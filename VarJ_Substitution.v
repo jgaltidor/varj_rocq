@@ -140,15 +140,14 @@ Definition open_t_bounds_with_names (k:nat) (tbnds:t_bounds) (names:list tname) 
 Definition open_e_t_with_names (k:nat) (e:exp) (names:list tname) :=
   (open_e_t k e (names2fvars_t names)).
 
-Definition openToCtxt_tbounds (names : list tname) (tbnds: t_bounds) : cxt_t :=
-  combine names (open_t_bounds 0 tbnds (names2fvars_t names)).
+Definition openToCtxt_tbounds (k:nat) (names : list tname) (tbnds: t_bounds) : cxt_t :=
+  combine names (open_t_bounds k tbnds (names2fvars_t names)).
 
-Definition openToCtxt_tvbounds (names : list tname) (tvbnds: tv_bounds) : cxt_t :=
-  openToCtxt_tbounds names (tvbounds_2_tbounds tvbnds).
-
+Definition openToCtxt_tvbounds (k:nat) (names : list tname) (tvbnds: tv_bounds) : cxt_t :=
+  openToCtxt_tbounds k names (tvbounds_2_tbounds tvbnds).
 
 Definition tbounds_matches_cxt (tbnds : t_bounds) (tcxt : cxt_t) : Prop :=
-  (openToCtxt_tbounds (dom tcxt) tbnds) = tcxt.
+  (openToCtxt_tbounds 0 (dom tcxt) tbnds) = tcxt.
 
 
 Inductive boundsOfTyp_matches_cxt : typ -> cxt_t -> Prop :=
