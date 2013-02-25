@@ -255,3 +255,10 @@ Inductive class_typing : classdef -> Prop :=
                (forall md, In md mds -> method_typing tcxt md C)) ->
             class_typing (C, tvbnds, N, fds, mds).
 
+
+Definition CT_isOK : Prop :=
+  forall C Cdef, In (C, Cdef) CT -> class_typing Cdef.
+
+(* All lemmas should assume the class table is well-formed *)
+Parameter classTableOK : CT_isOK.
+
