@@ -25,12 +25,12 @@ Inductive ubound_b : cxt_t -> typ_b -> typ_b -> Prop :=
 Inductive ok_t : cxt_t -> typ -> Prop :=
 | ok_t_fvar : forall tcxt X, In X (dom tcxt) -> ok_t tcxt (t_fvar X)
 
-| ok_t_ext : forall tcxt tbnds N L,
-             (forall xs,
+| ok_t_ext : forall tcxt tbnds N L xs,
                 distinct L (length tbnds) xs ->
                 let tcxt' := (openToCtxt_tbounds 0 xs tbnds) in
                 let N'    := (open_n_with_names 0 N xs) in
-                ok_cxt_t tcxt tcxt' /\ ok_n (tcxt ++ tcxt') N') ->
+                ok_cxt_t tcxt tcxt' ->
+                ok_n (tcxt ++ tcxt') N' ->
        (* ---------------------------------------------------------- *)
              ok_t tcxt (t_ext tbnds N)
 
@@ -42,7 +42,7 @@ with ok_n : cxt_t -> typ_n -> Prop :=
            let tvbnds_opened := (open_tv_bounds 0 tvbnds ts) in
            (forall t v b_low t_up,
               In (t, (v, b_low, t_up)) (combine ts tvbnds_opened) ->
-              subtype_b tcxt b_low (b_typ t) /\
+              subtype_b tcxt b_low (b_typ t) ->
               subtype_t tcxt t t_up) ->
            (forall t, In t ts -> ok_t tcxt t) ->
            ok_n tcxt (n_typ C ts)

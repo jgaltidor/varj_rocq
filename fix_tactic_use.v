@@ -41,9 +41,10 @@ Lemma inversion_field :
      subtype_t (tcxt ++ tcxt' ++ tcxt_n) U T).
 
 Proof.
+  fix IH 6.
   intros tcxt ecxt e f T tcxt' H1 H2.
   remember (e_field e f) as He.
-  induction H1.
+  destruct H1.
 
   (* Impossible case: typing_var *)
     inversion HeqHe.
@@ -65,6 +66,7 @@ Proof.
     apply app_nil_r.
     rewrite -> H'.
   
+      (* Proving " ok_cxt_t tcxt tcxt' " *)
       split.
       apply H2.
 
@@ -80,16 +82,36 @@ Proof.
       apply subtype_t_refl.
 
    (* Case: typing_subs *)
+      (* First simplify hypotheses *)
+      rewrite -> HeqHe in *.
       (* Simpilify goal *)
       simpl.
-      remember (IHtyping HeqHe H0) as H'.
+
+      inversion H as [U Hu].
+      inversion Hu as [tbnds Htbnds].
+
+      remember (fresh_list L (length tbnds)) as ys.
+
+      remember (fresh_and_distinct L (length tbnds) Heqys) as ysDistinct.
+
+      specialize (Htbnds ys ysDistinct).
+
+      inversion Htbnds.
+      inversion H3.
+      clear - IH H1 H4 H5.
+
+      remember (openToCtxt_tbounds 0 ys tbnds) as tcxt''.
+      remember (IH tcxt ecxt e f U tcxt'' H1 H5) as H'.
       inversion H' as [tcxt_n' Htcxt_n'].
+      (* Next guard fails because (fresh_list L (length tbnds)) is not a subterm
+       * of terms applied to the inductive hypothesis.
+       *)
+      Guarded.
       inversion Htcxt_n' as [tbnds' Htbnds'].
       inversion Htbnds' as [N Hn].
       inversion Hn as [U' Hu'].
-      clear - H Hu' H1 H2 H3.
-
-      exists (tcxt' ++ tcxt_n'), tbnds', N, U'.
+      clear - IH Hu' H1 H4 H5.
+      exists (tcxt'' ++ tcxt_n'), tbnds', N, U'.
       split.
       apply Hu'.
 
@@ -102,26 +124,27 @@ Proof.
       split.
       apply Hu'.
 
+      
       assert
-        (subtype_t ((tcxt ++ tcxt') ++ tcxt_n' ++ nil) U T)
-        as Hweak.
+        (subtype_t ((tcxt ++ tcxt'') ++ tcxt_n' ++ nil) U T)
+        as H4weak.
         apply weakening_subtyping with
-          (tcxt:=tcxt++tcxt') (tcxt':=nil) (tcxt'':=tcxt_n')
+          (tcxt:=tcxt++tcxt'') (tcxt':=nil) (tcxt'':=tcxt_n')
           (T:=U) (T':=T).
         ssimpl_list.
         apply context_movement.
         apply Hu'.
         ssimpl_list.
-        apply H.
+        apply H4.
 
-      assert (tcxt ++ tcxt' ++ tcxt_n'
-              = (tcxt ++ tcxt') ++ tcxt_n' ++ nil) as Hlisteq.
+      assert (tcxt ++ tcxt'' ++ tcxt_n'
+              = (tcxt ++ tcxt'') ++ tcxt_n' ++ nil) as Hlisteq.
       ssimpl_list.
       apply app_assoc.
-      rewrite <- Hlisteq in Hweak.
+      rewrite <- Hlisteq in H4weak.
       apply subtype_t_trans with (t2:=U).
       apply Hu'.
-      apply Hweak.
+      apply H4weak.
       (* Completed T-subs case; the last relevant case *)
 
       repeat inversion HeqHe.

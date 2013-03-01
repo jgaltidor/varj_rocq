@@ -122,27 +122,26 @@ Inductive typing : cxt_t -> cxt_e -> exp -> typ -> cxt_t -> Prop :=
 
 | typing_field : forall tcxt ecxt e f tbnds N T tcxt',
                  typing tcxt ecxt e (t_ext tbnds N) nil ->
+                 tbounds_matches_cxt tbnds tcxt' ->
                  let N_open := (open_n_with_names 0 N (dom tcxt')) in
                  ftype f N_open T ->
                  typing tcxt ecxt (e_field e f) T tcxt'
 
-| typing_subs : forall tcxt ecxt e T L,
-                  (exists U tbnds,
-                     (forall xs,
-                        distinct L (length tbnds) xs ->
-                        let tcxt' := openToCtxt_tbounds 0 xs tbnds in
-                        typing tcxt ecxt e U tcxt' /\
-                        subtype_t (tcxt ++ tcxt') U T /\
-                        ok_cxt_t tcxt tcxt')) ->
+| typing_subs : forall tcxt ecxt e T U tcxt',
+                typing tcxt ecxt e U tcxt' ->
+                subtype_t (tcxt ++ tcxt') U T ->
+                ok_cxt_t tcxt tcxt' ->
                 ok_t tcxt T ->
                 typing tcxt ecxt e T nil
 
 | typing_invk : forall tcxt ecxt e m Ps es tcxt' tcxts tbnds N
                        methBnds Us U Ts Targs Ns' Us' L,
                 typing tcxt ecxt e (t_ext tbnds N) nil ->
+                tbounds_matches_cxt tbnds tcxt' ->
                 (forall P, In P Ps -> ok_p tcxt P) ->
-                (forall e_i Targ_i,
-                   In (e_i, Targ_i) (combine es Targs) ->
+                (forall e_i Targ_i tcxt_i,
+                   In (e_i, Targ_i, tcxt_i) (combine (combine es Targs) tcxts) ->
+                   boundsOfTyp_matches_cxt Targ_i tcxt_i ->
                    typing tcxt ecxt e_i Targ_i nil) ->
                 (let N_open := (open_n_with_names 0 N (dom tcxt')) in
                   mtype m N_open (methBnds, Us, U)) ->
@@ -184,8 +183,8 @@ Inductive typing : cxt_t -> cxt_e -> exp -> typ -> cxt_t -> Prop :=
                                Bs_low_open)
                             Ts_up_open)
                          Ts) ->
-                   subtype_t tcxt'' Targ_i U_i /\
-                   subtype_b tcxt'' B_low (b_typ T_i) /\
+                   subtype_t tcxt'' Targ_i U_i ->
+                   subtype_b tcxt'' B_low (b_typ T_i) ->
                    subtype_t tcxt'' T_i Targ_i) ->
         (* -------------------------------------------------------------------------- *)
                 typing tcxt ecxt (e_minvk e m Ps es) (open_t 0 U Ts)
@@ -210,6 +209,7 @@ Inductive method_typing : cxt_t -> methdef -> cname -> Prop :=
 | w_meth : forall clsCxt m methBnds T Ts e C clsTVBnds
                   N fds mds L_bnds L_body,
            binds C (C, clsTVBnds, N, fds, mds) CT ->
+           tbounds_matches_cxt (tvbounds_2_tbounds clsTVBnds) clsCxt ->
            override m N (methBnds, Ts, T) ->
            let clsVars := tvbounds_vars clsTVBnds in
            let clsVarsNegated := negateVars clsVars in
@@ -223,9 +223,9 @@ Inductive method_typing : cxt_t -> methdef -> cname -> Prop :=
               let Ts_open  := open_ts_with_names 0 Ts Ys in
               let T_open   := open_t_with_names 0 T Ys in
               let tcxt     := clsCxt ++ methCxt in
-              ok_cxt_t clsCxt methCxt /\
-              ok_t tcxt T_open /\
-              (forall T_i, In T_i Ts_open -> ok_t tcxt T_i) /\
+              ok_cxt_t clsCxt methCxt ->
+              ok_t tcxt T_open ->
+              (forall T_i, In T_i Ts_open -> ok_t tcxt T_i) ->
               (forall xs,
                  distinct (this::L_body) (length Ts) xs ->
                  let X_typs   := List.map (fun X => t_fvar X) Xs in
@@ -236,24 +236,24 @@ Inductive method_typing : cxt_t -> methdef -> cname -> Prop :=
 
 
 Inductive class_typing : classdef -> Prop :=
-| w_cls : forall C tvbnds N fds mds L,
-            (forall Xs,
-               distinct L (length tvbnds) Xs ->
-               let N_open := open_n_with_names 0 N Xs in
-               let Ts_open := (* field types *)
-                 List.map
-                   (fun (fd:fielddef) =>
-                      let (f, T) := fd in open_t_with_names 0 T Xs)
-                   fds
-               in
-               let tcxt := openToCtxt_tvbounds 0 Xs tvbnds in
-               let clsVars := tvbounds_vars tvbnds in
-               mono_n clsVars Xs N_open /\
-               (forall T_i, In T_i Ts_open -> mono_t clsVars Xs T_i) /\
-               ok_n tcxt N_open /\
-               (forall T_i, In T_i Ts_open -> ok_t tcxt T_i) /\
-               (forall md, In md mds -> method_typing tcxt md C)) ->
-            class_typing (C, tvbnds, N, fds, mds).
+| w_cls : forall C tvbnds N fds mds L Xs,
+          distinct L (length tvbnds) Xs ->
+          let N_open := open_n_with_names 0 N Xs in
+          let Ts_open := (* field types *)
+            List.map
+              (fun (fd:fielddef) =>
+                 let (f, T) := fd in open_t_with_names 0 T Xs)
+              fds
+          in
+          let tcxt := openToCtxt_tvbounds 0 Xs tvbnds in
+          let clsVars := tvbounds_vars tvbnds in
+          mono_n clsVars Xs N_open ->
+          (forall T_i, In T_i Ts_open -> mono_t clsVars Xs T_i) ->
+          ok_cxt_t nil tcxt ->
+          ok_n tcxt N_open ->
+          (forall T_i, In T_i Ts_open -> ok_t tcxt T_i) ->
+          (forall md, In md mds -> method_typing tcxt md C) ->
+          class_typing (C, tvbnds, N, fds, mds).
 
 
 Definition CT_isOK : Prop :=
