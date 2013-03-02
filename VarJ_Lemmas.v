@@ -39,7 +39,6 @@ Lemma inversion_field :
      tbounds_matches_cxt tbnds (tcxt' ++ tcxt_n) /\
      ftype f (open_n_with_names 0 N (dom (tcxt' ++ tcxt_n))) U /\
      subtype_t (tcxt ++ tcxt' ++ tcxt_n) U T).
-
 Proof.
   intros tcxt ecxt e f T tcxt' H1 H2.
   remember (e_field e f) as He.
@@ -124,6 +123,7 @@ Proof.
       apply Hweak.
       (* Completed T-subs case; the last relevant case *)
 
-      repeat inversion HeqHe.
+  (* Impossible case: typing_invk *)
+  inversion HeqHe.
 Qed.
 
