@@ -2,6 +2,7 @@
 
 Require Import VarJ_Syntax.
 Require Import VarJ_Substitution.
+Require Import VarJ_Variance.
 Require Import VarJ_Subtyping.
 Require Import VarJ_Lookup.
 Require Import VarJ_Wellform.
