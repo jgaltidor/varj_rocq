@@ -39,12 +39,13 @@ with ok_n : cxt_t -> typ_n -> Prop :=
 
 | ok_n_c : forall C tvbnds N fds mds tcxt ts,
            binds C (C, tvbnds, N, fds, mds) CT ->
-           let tvbnds_opened := (open_tv_bounds 0 tvbnds ts) in
-           (forall t v b_low t_up,
-              In (t, (v, b_low, t_up)) (combine ts tvbnds_opened) ->
-              subtype_b tcxt b_low (b_typ t) ->
-              subtype_t tcxt t t_up) ->
-           (forall t, In t ts -> ok_t tcxt t) ->
+           let tvbnds_opened := open_tv_bounds 0 tvbnds ts in
+           let lower_bounds  := tv_bounds_get_lower_bounds tvbnds_opened in
+           let upper_bounds  := tv_bounds_get_upper_bounds tvbnds_opened in
+           let ts_as_bs      := List.map b_typ ts in
+           wide_subtype_b tcxt lower_bounds ts_as_bs ->
+           wide_subtype_t tcxt ts upper_bounds ->
+           wide_ok_t tcxt ts ->
            ok_n tcxt (n_typ C ts)
 
 with ok_b : cxt_t -> typ_b -> Prop :=
@@ -56,18 +57,28 @@ with ok_b : cxt_t -> typ_b -> Prop :=
 with ok_cxt_t : cxt_t -> cxt_t -> Prop :=
 | ok_cxt_t_nil : forall tcxt, ok_cxt_t tcxt nil
 
-| ok_cxt_t_cons: forall tcxt x b_low t_up tcxt'
-                        b_low_ubound t_up_ubound,
-                  no_binds x tcxt ->
-                  let entireCxt := (tcxt ++ ((x, (b_low, t_up))::tcxt')) in
-                  ok_b entireCxt b_low ->
-                  ok_t entireCxt t_up ->
-                  ubound_b tcxt b_low b_low_ubound ->
-                  ubound_t tcxt t_up  t_up_ubound ->
-                  subtype_b tcxt b_low_ubound (b_typ t_up_ubound) ->
-                  subtype_b tcxt b_low (b_typ t_up) ->
-                  ok_cxt_t (tcxt ++ ((x, (b_low, t_up))::nil)) tcxt' ->
-                  ok_cxt_t tcxt ((x, (b_low, t_up)) :: tcxt').
+| ok_cxt_t_cons:
+    forall tcxt x b_low t_up tcxt'
+           b_low_ubound t_up_ubound,
+      no_binds x tcxt ->
+      let entireCxt := (tcxt ++ ((x, (b_low, t_up))::tcxt')) in
+      ok_b entireCxt b_low ->
+      ok_t entireCxt t_up ->
+      ubound_b tcxt b_low b_low_ubound ->
+      ubound_t tcxt t_up  t_up_ubound ->
+      subtype_b tcxt b_low_ubound (b_typ t_up_ubound) ->
+      subtype_b tcxt b_low (b_typ t_up) ->
+      ok_cxt_t (tcxt ++ ((x, (b_low, t_up))::nil)) tcxt' ->
+  (* ---------------------------------------------------- *)
+      ok_cxt_t tcxt ((x, (b_low, t_up)) :: tcxt')
+
+with wide_ok_t : cxt_t -> list typ -> Prop :=
+| wide_ok_t_nil : forall tcxt, wide_ok_t tcxt nil
+| wide_ok_t_cons :
+    forall tcxt t ts,
+      ok_t tcxt t ->
+      wide_ok_t tcxt ts ->
+      wide_ok_t tcxt (t::ts).
 
 Inductive ok_p : cxt_t -> typ_p -> Prop :=
 | ok_p_inf : forall tcxt, ok_p tcxt p_inf

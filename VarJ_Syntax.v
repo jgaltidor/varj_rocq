@@ -103,6 +103,19 @@ Notation tv_bound := (variance * typ_b * typ).
 Notation tv_bounds := (list tv_bound).
 
 
+Definition tv_bound_get_lower_bound (tvbnd: tv_bound) :=
+  match tvbnd with (v, lower, upper) => lower end.
+
+Definition tv_bound_get_upper_bound (tvbnd: tv_bound) :=
+  match tvbnd with (v, lower, upper) => upper end.
+
+Definition tv_bounds_get_lower_bounds (tvbnds: tv_bounds) :=
+  List.map tv_bound_get_lower_bound tvbnds.
+
+Definition tv_bounds_get_upper_bounds (tvbnds: tv_bounds) :=
+  List.map tv_bound_get_upper_bound tvbnds.
+
+
 Inductive exp : Set :=
 | e_field  : exp -> fname -> exp
 | e_minvk  : exp -> mname -> list typ_p -> list exp -> exp
