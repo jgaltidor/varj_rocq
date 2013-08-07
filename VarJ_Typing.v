@@ -2,6 +2,7 @@
 
 Require Import VarJ_Syntax.
 Require Import VarJ_Substitution.
+Require Import VarJ_Variance.
 Require Import VarJ_Subtyping.
 Require Import VarJ_Lookup.
 Require Import VarJ_Wellform.
@@ -52,6 +53,18 @@ Fixpoint stripRanges (ts:list typ) : list typ :=
   end.
 
 
+Definition tname_notInFV (x:tname) (ts:list typ) : Prop :=
+  ~(In x (fv_ts ts)).
+
+Inductive wide_tname_notInFV : list tname -> list typ -> Prop :=
+| wide_tname_notInFV_nil : forall ts, wide_tname_notInFV nil ts
+| wide_tname_notInFV_cons :
+    forall x xs ts,
+      tname_notInFV x ts ->
+      wide_tname_notInFV xs ts ->
+      wide_tname_notInFV (x::xs) ts.
+
+
 Inductive sift (E:Type) : list E -> list typ -> list tname ->
                           list E -> list typ -> Prop :=
 | sift_empty : forall ys,
@@ -59,7 +72,7 @@ Inductive sift (E:Type) : list E -> list typ -> list tname ->
 
 | sift_add : forall e es u us ys es' us',
                (exists y, In y ys /\ In y (fv_t u)) ->
-               (forall y, In y ys /\ In y (fv_t u) -> var_t y u invar) ->
+               (forall y, In y ys -> In y (fv_t u) -> var_t y u invar) ->
                sift E es us ys es' us' ->
                sift E (e::es) (u::us) ys (e::es') (u::us')
 
@@ -77,30 +90,57 @@ Inductive sift (E:Type) : list E -> list typ -> list tname ->
                       sift E (e::es) (u::us) ys es' us'.
 
 
+Inductive matchInputsOK (typeFormals:list typ) :
+  list typ_p -> list tname -> list typ -> Prop :=
+| matchInputsOK_nil : matchInputsOK typeFormals nil nil nil
+
+| matchInputsOK_cons_infer :
+    forall ps y ys t ts,
+      In y (body_fv_ts typeFormals) ->
+      matchInputsOK typeFormals ps ys ts ->
+      matchInputsOK typeFormals (p_inf::ps) (y::ys) (t::ts)
+
+| matchInputsOK_cons_given :
+    forall ps y ys t ts,
+      matchInputsOK typeFormals ps ys ts ->
+      matchInputsOK typeFormals ((p_typ t)::ps) (y::ys) (t::ts).
+
+
+Inductive defsubtype_possible :
+  typ_n -> typ -> list tname -> list typ -> Prop :=
+| defsubtype_possible_ext :
+    forall N tbnd N' ys ts,
+      (exists ts',
+        wide_tname_notInFV ys ts'
+        /\
+        let N'_open := (open_n 0 N' ts') in
+        subtype_n nil N (subst_n ys ts N'_open)) ->
+    (* -------------------------------------------- *)
+      defsubtype_possible N (t_ext tbnd N') ys ts
+| defsubtype_possible_fvar :
+    forall N X ys ts,
+      defsubtype_possible N (t_fvar X) ys ts.
+
+
+Inductive wide_defsubtype_possible :
+  list typ_n -> list typ -> list tname -> list typ -> Prop :=
+| wide_defsubtype_possible_nil :
+    forall ys ts,
+      wide_defsubtype_possible nil nil ys ts
+| wide_defsubtype_possible_cons :
+    forall n ns u us ys ts,
+      defsubtype_possible n u ys ts ->
+      wide_defsubtype_possible ns us ys ts ->
+      wide_defsubtype_possible (n::ns) (u::us) ys ts.
+
+
 Definition matching (ns: list typ_n) (us: list typ) (ps: list typ_p)
   (ys: list tname) (ts: list typ) : Prop :=
-
-    (forall p y t,
-       In (p, y, t) (combine (combine ps ys) ts) ->
-       match p with
-         | p_inf => In y (body_fv_ts us)
-         | p_typ t' => t = t'
-       end)
+    matchInputsOK us ps ys ts
     /\
-    (forall n u,
-       In (n, u) (combine ns us) ->
-       match u with
-         | t_ext _ n' =>
-             (exists ts',
-                (forall y, In y ys -> ~(In y (fv_ts ts')))
-                /\
-                let n'_open := (open_n 0 n' ts') in
-                subtype_n nil n (subst_n ys ts n'_open))
-         | t_bvar _ _ => False
-         | t_fvar _ => True
-       end)
+    wide_defsubtype_possible ns us ys ts
     /\
-    (forall y, In y ys -> ~(In y (fv_ts ts))).
+    wide_tname_notInFV ys ts.
 
 
 Inductive typing : cxt_t -> cxt_e -> exp -> typ -> cxt_t -> Prop :=
@@ -109,13 +149,12 @@ Inductive typing : cxt_t -> cxt_e -> exp -> typ -> cxt_t -> Prop :=
                binds x t ecxt ->
                typing tcxt ecxt (e_fvar x) t nil
 
-| typing_new : forall tcxt ecxt C ts es fds,
+| typing_new : forall tcxt ecxt C ts es fds us,
                ok_n tcxt (n_typ C ts) ->
                fields C fds ->
-               (forall f e U,
-                  In (f, e) (combine (dom fds) es) ->
-                  ftype f (n_typ C ts) U ->
-                  typing tcxt ecxt e U nil) ->
+               let fieldNames := (dom fds) in
+               wide_ftype (n_typ C ts) fieldNames us ->
+               wide_typing tcxt ecxt es us nil ->
                typing tcxt ecxt (e_new (n_typ C ts) es)
                                 (t_ext nil (n_typ C ts))
                                 nil
@@ -188,7 +227,19 @@ Inductive typing : cxt_t -> cxt_e -> exp -> typ -> cxt_t -> Prop :=
                    subtype_t tcxt'' T_i Targ_i) ->
         (* -------------------------------------------------------------------------- *)
                 typing tcxt ecxt (e_minvk e m Ps es) (open_t 0 U Ts)
-                                                     (tcxt' ++ (flatten tcxts)).
+                                                     (tcxt' ++ (flatten tcxts))
+
+
+with wide_typing :
+       cxt_t -> cxt_e -> list exp -> list typ -> cxt_t -> Prop :=
+| wide_typing_nil :
+    forall tcxt ecxt tcxt',
+      wide_typing tcxt ecxt nil nil tcxt'
+| wide_typing_cons :
+    forall tcxt ecxt e es t ts tcxt',
+      typing tcxt ecxt e t tcxt' ->
+      wide_typing tcxt ecxt es ts tcxt' ->
+      wide_typing tcxt ecxt (e::es) (t::ts) tcxt'.
 
 
 (* Override Check *)

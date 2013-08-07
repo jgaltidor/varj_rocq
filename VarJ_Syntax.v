@@ -74,6 +74,18 @@ Notation t_bound := (typ_b * typ).
 (** Represents list of lower and upper bounds of type parameters *)
 Notation t_bounds := (list t_bound).
 
+Definition t_bound_get_lower_bound (tbnd: t_bound) :=
+  let (lower, upper) := tbnd in lower.
+
+Definition t_bound_get_upper_bound (tbnd: t_bound) :=
+  let (lower, upper) := tbnd in upper.
+
+Definition t_bounds_get_lower_bounds (tbnds: t_bounds) :=
+  List.map t_bound_get_lower_bound tbnds.
+
+Definition t_bounds_get_upper_bounds (tbnds: t_bounds) :=
+  List.map t_bound_get_upper_bound tbnds.
+
 Inductive variance : Set :=
 | covar : variance
 | contravar : variance
@@ -89,6 +101,19 @@ Notation "*" := bivar     (at level 30) : variance_scope.
   *)
 Notation tv_bound := (variance * typ_b * typ).
 Notation tv_bounds := (list tv_bound).
+
+
+Definition tv_bound_get_lower_bound (tvbnd: tv_bound) :=
+  match tvbnd with (v, lower, upper) => lower end.
+
+Definition tv_bound_get_upper_bound (tvbnd: tv_bound) :=
+  match tvbnd with (v, lower, upper) => upper end.
+
+Definition tv_bounds_get_lower_bounds (tvbnds: tv_bounds) :=
+  List.map tv_bound_get_lower_bound tvbnds.
+
+Definition tv_bounds_get_upper_bounds (tvbnds: tv_bounds) :=
+  List.map tv_bound_get_upper_bound tvbnds.
 
 
 Inductive exp : Set :=
