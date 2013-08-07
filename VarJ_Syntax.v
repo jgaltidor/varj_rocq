@@ -74,6 +74,18 @@ Notation t_bound := (typ_b * typ).
 (** Represents list of lower and upper bounds of type parameters *)
 Notation t_bounds := (list t_bound).
 
+Definition t_bound_get_lower_bound (tbnd: t_bound) :=
+  let (lower, upper) := tbnd in lower.
+
+Definition t_bound_get_upper_bound (tbnd: t_bound) :=
+  let (lower, upper) := tbnd in upper.
+
+Definition t_bounds_get_lower_bounds (tbnds: t_bounds) :=
+  List.map t_bound_get_lower_bound tbnds.
+
+Definition t_bounds_get_upper_bounds (tbnds: t_bounds) :=
+  List.map t_bound_get_upper_bound tbnds.
+
 Inductive variance : Set :=
 | covar : variance
 | contravar : variance

@@ -142,6 +142,11 @@ Definition wide_var_transform_op (vs1 vs2: list variance) : list variance :=
     (List.combine vs1 vs2).
 
 
+Example var_neq_ex : invar <> covar.
+Proof.
+  discriminate.
+Qed.
+
 Lemma var_lt_trans : forall (v1 v2 v3:variance), v1 < v2 -> v2 < v3 -> v1 < v3.
 Proof.
   intros v1 v2 v3.
@@ -221,35 +226,6 @@ Inductive var_p : tname -> typ_p -> variance -> Prop :=
 | var_p_typ : forall X t v,
               var_t X t v -> var_p X (p_typ t) v.
 
-Inductive wide_var_b : list tname -> list typ_b -> list variance -> Prop :=
-| wide_var_b_nil : wide_var_b nil nil nil
-| wide_var_b_cons : forall x xs b bs v vs,
-                var_b x b v ->
-                wide_var_b xs bs vs ->
-                wide_var_b (x::xs) (b::bs) (v::vs).
-
-Inductive wide_var_t : list tname -> list typ -> list variance -> Prop :=
-| wide_var_t_nil : wide_var_t nil nil nil
-| wide_var_t_cons : forall x xs t ts v vs,
-                var_t x t v ->
-                wide_var_t xs ts vs ->
-                wide_var_t (x::xs) (t::ts) (v::vs).
-
-Inductive wide_var_n : list tname -> list typ_n -> list variance -> Prop :=
-| wide_var_n_nil : wide_var_n nil nil nil
-| wide_var_n_cons : forall x xs n ns v vs,
-                var_n x n v ->
-                wide_var_n xs ns vs ->
-                wide_var_n (x::xs) (n::ns) (v::vs).
-
-Inductive wide_var_p : list tname -> list typ_p -> list variance -> Prop :=
-| wide_var_p_nil : wide_var_p nil nil nil
-| wide_var_p_cons : forall x xs p ps v vs,
-                var_p x p v ->
-                wide_var_p xs ps vs ->
-                wide_var_p (x::xs) (p::ps) (v::vs).
-
-
 Inductive mono_b : list variance -> list tname -> typ_b -> Prop :=
 | mono_b_nil : forall b, mono_b nil nil b
 | mono_b_cons :
@@ -286,8 +262,31 @@ Inductive mono_t_bounds (vs: list variance) (xs:list tname): list t_bound -> Pro
       mono_t_bounds vs xs tbnds ->
       mono_t_bounds vs xs (tbnd::tbnds).
 
-Example var_neq_ex : invar <> covar.
-Proof.
-  discriminate.
-Qed.
+Inductive wide_var_b : list tname -> list typ_b -> list variance -> Prop :=
+| wide_var_b_nil : wide_var_b nil nil nil
+| wide_var_b_cons : forall x xs b bs v vs,
+                var_b x b v ->
+                wide_var_b xs bs vs ->
+                wide_var_b (x::xs) (b::bs) (v::vs).
+
+Inductive wide_var_t : list tname -> list typ -> list variance -> Prop :=
+| wide_var_t_nil : wide_var_t nil nil nil
+| wide_var_t_cons : forall x xs t ts v vs,
+                var_t x t v ->
+                wide_var_t xs ts vs ->
+                wide_var_t (x::xs) (t::ts) (v::vs).
+
+Inductive wide_var_n : list tname -> list typ_n -> list variance -> Prop :=
+| wide_var_n_nil : wide_var_n nil nil nil
+| wide_var_n_cons : forall x xs n ns v vs,
+                var_n x n v ->
+                wide_var_n xs ns vs ->
+                wide_var_n (x::xs) (n::ns) (v::vs).
+
+Inductive wide_var_p : list tname -> list typ_p -> list variance -> Prop :=
+| wide_var_p_nil : wide_var_p nil nil nil
+| wide_var_p_cons : forall x xs p ps v vs,
+                var_p x p v ->
+                wide_var_p xs ps vs ->
+                wide_var_p (x::xs) (p::ps) (v::vs).
 

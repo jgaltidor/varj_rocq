@@ -17,9 +17,7 @@ Inductive subtype_n : cxt_t -> typ_n -> typ_n -> Prop :=
 | subtype_n_var:
   forall VT C vars tcxt ts ts',
   VT C vars ->
-  (forall v t t',
-     In (v, t, t') (combine (combine vars ts) ts') ->
-     var_subtype tcxt v t t') ->
+  wide_var_subtype tcxt vars ts ts' ->
   subtype_n tcxt (n_typ C ts) (n_typ C ts')
 
 with subtype_t : cxt_t -> typ -> typ -> Prop :=
@@ -54,19 +52,26 @@ with subtype_t : cxt_t -> typ -> typ -> Prop :=
                    subtype_n (tcxt ++ tcxt') N N') ->
                 subtype_t tcxt (t_ext nil N) (t_ext tbnds' N')
 
-| subtype_t_pack : forall tcxt tbnds tbnds' N ts L,
-                     (forall xs,
-                        distinct L (length tbnds') xs ->
-                        let tcxt' := openToCtxt_tbounds 0 xs tbnds' in
-                        (* Need to open ts because they contain binders in tbnds' *)
-                        let ts' := open_ts_with_names 0 ts xs in
-                        let tbnds_opened := open_t_bounds 0 tbnds ts' in
-                        (forall t' b_low t_up,
-                           In (t', (b_low, t_up)) (combine ts' tbnds_opened) ->
-                           subtype_b (tcxt ++ tcxt') b_low  (b_typ t') /\
-                           subtype_t (tcxt ++ tcxt') t' t_up)) ->
-             (* -------------------------------------------------------------------- *)
-                   subtype_t tcxt (t_ext tbnds' (open_n 0 N ts)) (t_ext tbnds N)
+| subtype_t_pack :
+    forall tcxt tbnds tbnds' N ts L ys,
+      (* Need to open subterms in the left type, which
+       * contain binders in tbnds'
+       *)
+      distinct L (length tbnds') ys ->
+      let tcxt' := openToCtxt_tbounds 0 ys tbnds' in
+      (* Need to open ts because they contain binders in tbnds' *)
+      let ts' := open_ts_with_names 0 ts ys in
+      (* Instantiating bounds in tbnds with ts' instead of ts
+       * because again ts may contain binders
+       *)
+      let tbnds_opened := open_t_bounds 0 tbnds ts' in
+      let lower_bounds := t_bounds_get_lower_bounds tbnds_opened in
+      let upper_bounds := t_bounds_get_upper_bounds tbnds_opened in
+      let ts'_as_bs    := List.map b_typ ts' in
+      wide_subtype_b (tcxt ++ tcxt') lower_bounds ts'_as_bs ->
+      wide_subtype_t (tcxt ++ tcxt') ts' upper_bounds ->
+ (* -------------------------------------------------------------------- *)
+      subtype_t tcxt (t_ext tbnds' (open_n 0 N ts)) (t_ext tbnds N)
 
 (** Next: Check wellformedness with f-bounds *)
 
@@ -105,5 +110,47 @@ with var_subtype : cxt_t -> variance -> typ -> typ -> Prop :=
    var_subtype tcxt invar t t'
 | var_subtype_bi:
    forall tcxt t t',
-   var_subtype tcxt bivar t t'.
+   var_subtype tcxt bivar t t'
+
+
+with wide_subtype_t : cxt_t -> list typ -> list typ -> Prop :=
+| wide_subtype_t_nil :
+    forall tcxt,
+      wide_subtype_t tcxt nil nil
+| wide_subtype_t_cons :
+    forall tcxt t ts t' ts',
+      subtype_t tcxt t t' ->
+      wide_subtype_t tcxt ts ts' ->
+      wide_subtype_t tcxt (t::ts) (t'::ts')
+
+with wide_subtype_b : cxt_t -> list typ_b -> list typ_b -> Prop :=
+| wide_subtype_b_nil :
+    forall tcxt,
+      wide_subtype_b tcxt nil nil
+| wide_subtype_b_cons :
+    forall tcxt b bs b' bs',
+      subtype_b tcxt b b' ->
+      wide_subtype_b tcxt bs bs' ->
+      wide_subtype_b tcxt (b::bs) (b'::bs')
+
+with wide_subtype_n : cxt_t -> list typ_n -> list typ_n -> Prop :=
+| wide_suntype_n_nil :
+    forall tcxt,
+      wide_subtype_n tcxt nil nil
+| wide_suntype_n_cons :
+    forall tcxt n ns n' ns',
+      subtype_n tcxt n n' ->
+      wide_subtype_n tcxt ns ns' ->
+      wide_subtype_n tcxt (n::ns) (n'::ns')
+
+with wide_var_subtype :
+  cxt_t -> list variance -> list typ -> list typ -> Prop :=
+| wide_var_subtype_nil :
+    forall tcxt,
+      wide_var_subtype tcxt nil nil nil
+| wide_var_subtype_cons :
+    forall tcxt v vs t ts t' ts',
+      var_subtype tcxt v t t' ->
+      wide_var_subtype tcxt vs ts ts' ->
+      wide_var_subtype tcxt (v::vs) (t::ts) (t'::ts').
 

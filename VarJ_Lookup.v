@@ -65,3 +65,25 @@ Inductive mbody : mname -> typ_n -> exp -> Prop :=
     mbody m (open_n 0 N ts) e ->
     mbody m (n_typ C ts) e.
 
+
+Inductive wide_ftype : typ_n -> list fname -> list typ -> Prop :=
+| wide_ftype_nil :
+    forall N,
+    wide_ftype N nil nil
+| wide_ftype_cons :
+    forall N f fs t ts,
+    ftype f N t ->
+    wide_ftype N fs ts ->
+    wide_ftype N (f::fs) (t::ts).
+
+
+Inductive wide_mtype : typ_n -> list mname -> list msig -> Prop :=
+| wide_mtype_nil :
+    forall N,
+    wide_mtype N nil nil
+| wide_mtype_cons :
+    forall N m ms sig sigs,
+    mtype m N sig ->
+    wide_mtype N ms sigs ->
+    wide_mtype N (m::ms) (sig::sigs).
+

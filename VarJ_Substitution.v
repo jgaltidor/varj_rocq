@@ -169,28 +169,6 @@ Inductive boundsOfTyp_matches_cxt : typ -> cxt_t -> Prop :=
     forall X, boundsOfTyp_matches_cxt (t_fvar X) nil.
 
 
-(** Implementing distinct predicate based on its definition
-  * in the paper (Arthur Chargueraud, 2012).
-  * distinct predicate is used for co-finite quantification.
-  *) 
-Inductive distinct (A:Type) : list A -> nat -> list A -> Prop :=
-| distinct_nil  : forall L, distinct L 0 nil
-| distinct_cons : forall L n x xs,
-                  ~(In x L) ->
-                  distinct (x::L) n xs ->
-                  distinct L (S n) (x::xs).
-
-Hint Constructors distinct.
-
-
-Fixpoint fresh_list (L: list atom) (n: nat) : list atom :=
-  match n with
-    | 0 => nil
-    | (S m) =>
-        let (x, _) := atom_fresh_for_list L in
-        x::(fresh_list (x::L) m)
-  end.
-
 
 Fixpoint subst_t (xs: list tname) (ts: list typ) (t: typ) : typ :=
   let subst_t_bound :=
@@ -265,157 +243,25 @@ Fixpoint subst_e (xs: list tname) (es: list exp) (expr: exp) : exp :=
         end
   end.
 
+(** Implementing distinct predicate based on its definition
+  * in the paper (Arthur Chargueraud, 2012).
+  * distinct predicate is used for co-finite quantification.
+  *) 
+Inductive distinct (A:Type) : list A -> nat -> list A -> Prop :=
+| distinct_nil  : forall L, distinct L 0 nil
+| distinct_cons : forall L n x xs,
+                  ~(In x L) ->
+                  distinct (x::L) n xs ->
+                  distinct L (S n) (x::xs).
+
+Hint Constructors distinct.
+
+Fixpoint fresh_list (L: list atom) (n: nat) : list atom :=
+  match n with
+    | 0 => nil
+    | (S m) =>
+        let (x, _) := atom_fresh_for_list L in
+        x::(fresh_list (x::L) m)
+  end.
 
 
-Lemma demorgan_and : forall P Q,  ~P -> ~Q -> ~(P \/ Q).
-Proof.
-  intros P Q H1 H2.
-  assert (~P /\ ~Q) as H'.
-  auto.
-  contradict H'.
-  destruct H'.
-    contradict H1.
-    apply H.
-  
-    contradict H2.
-    apply H.
-Qed.
-
-
-Lemma distinct_resultnotin (A:Type):
-  forall L n xs,
-  distinct L n xs ->
-  (forall (y:A), In y xs -> ~(In y L)) /\
-  (length xs) = n.
-Proof.
-  intros L n xs H.
-  split.
-    intros y yInxs.
-    induction H.
-    contradict yInxs.
-    
-    simpl In in yInxs.
-    case yInxs.
-    intros Hy_eq_x.
-    rewrite <- Hy_eq_x.
-    apply H.
-
-    intros yInxs'.
-    apply IHdistinct in yInxs'.
-    simpl In in yInxs'.
-    assert (~(x = y) /\ ~(y \in L)) as H'.
-    auto.
-    apply H'.
-
-
-    induction H.
-    reflexivity.
-    simpl.
-    rewrite -> IHdistinct.
-    reflexivity.
-Qed.
-
-
-(*
-Lemma distinct_order_irrelevant (A:Type) :
-  forall (x:A) (y:A) (L:list A) (n:nat) (xs:list A),
-  distinct (x::y::L) n xs ->
-  distinct (y::x::L) n xs.
-Proof.
-  intros x y L n xs H.
-  induction xs.
-    inversion H.
-    apply distinct_nil.
-
-    
-  
-  apply distinct_nil.
-
-  auto.
-  
-  apply distinct_cons.
-
-  
-  auto.
-*)
-
-(*
-Lemma distinct_extension (A:Type) :
-  forall (L:list A) n xs (y:A),
-  distinct L n xs ->
-  ~(In y xs) ->
-  ~(In y L) ->
-  distinct (y::L) n xs.
-Proof.
-  intros L n xs y H1 H2 H3.
-  induction H1.
-
-  apply distinct_nil.
-
-  simpl In in H2.
-  assert (~(x = y) /\ ~(y \in xs)) as H2'.
-  auto.
-
-  apply distinct_cons.
-  simpl In.
-  apply demorgan_and.
-  auto.
-  apply H.
-
-  auto.
-
-  apply IHdistinct.
-  
-
-  simpl In in H2.
-  unfold not in H2.
-  simpl.
-  unfold not.
-  simpl In.
-  intros H'.
-  contradict H'.
-
-  simpl In in H2.
-  unfold not in H2.
-  simpl In in H2.
-
-  contradict H.
-  
-
-  assert (x <> x0) as H'.
-  unfold not in H2.
-  simpl In in H2.
-
-  unfold not.
-  simpl In.
-  unfold not in H2.
-  simpl In in H2.
-  intro 
-
-  unfold not in H2.
-  simpl In in H2.
-  unfold not.
-  simpl.
-  unfold not in H.
-  unfold not in H2.
-  simpl In in H2.
-  apply H.
-  apply 
-
-  contradict in H2.
-  unfold not in H2.
-  simpl H2.
-  unfold not in H2.
-  unfold not.
-  simpl.
-  
-
-Qed.
-*)
-
-Lemma fresh_and_distinct : forall L n xs,
-  xs = fresh_list L n ->
-  distinct L n xs.
-Proof.
-    admit.
-Qed.
