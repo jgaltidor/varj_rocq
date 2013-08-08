@@ -53,7 +53,7 @@ Inductive step : exp -> exp -> Prop :=
              step (e_field e f) (e_field e' f)
 
 | rc_new : forall es N es',
-           step_list es es' ->
+           wide_step es es' ->
            step (e_new N es) (e_new N es')
 
 
@@ -64,18 +64,18 @@ Inductive step : exp -> exp -> Prop :=
 
 | rc_inv_arg : forall e m ps es es',
                value e ->
-               step_list es es' ->
+               wide_step es es' ->
                step (e_minvk e m ps es) (e_minvk e m ps es')
 
 
-with step_list : list exp -> list exp -> Prop :=
+with wide_step : list exp -> list exp -> Prop :=
 
-| step_list_hdstep : forall e e' es,
+| wide_step_hdstep : forall e e' es,
                      step e e' ->
-                     step_list (e::es) (e'::es)
+                     wide_step (e::es) (e'::es)
 
-| step_list_hdskip : forall e es es',
+| wide_step_hdskip : forall e es es',
                      value e ->
-                     step_list es es' ->
-                     step_list (e::es) (e::es').
+                     wide_step es es' ->
+                     wide_step (e::es) (e::es').
 
