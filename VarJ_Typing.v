@@ -143,6 +143,18 @@ Definition matching (ns: list typ_n) (us: list typ) (ps: list typ_p)
     wide_tname_notInFV ys ts.
 
 
+Fixpoint filterPossibleSiftPairs (typePairs: list (typ * typ)) :
+  (list (typ_n * typ)) :=
+match typePairs with
+  | (t, u)::Pairs =>
+      match t with
+        | t_ext _ N => (N, u)::(filterPossibleSiftPairs Pairs)
+        | _ => filterPossibleSiftPairs Pairs
+      end
+  | nil => nil
+end.
+
+
 Inductive typing : cxt_t -> cxt_e -> exp -> typ -> cxt_t -> Prop :=
 
 | typing_var : forall tcxt ecxt x t,
@@ -173,61 +185,73 @@ Inductive typing : cxt_t -> cxt_e -> exp -> typ -> cxt_t -> Prop :=
                 ok_t tcxt T ->
                 typing tcxt ecxt e T nil
 
-| typing_invk : forall tcxt ecxt e m Ps es tcxt' tcxts tbnds N
-                       methBnds Us U Ts Targs Ns' Us' L,
-                typing tcxt ecxt e (t_ext tbnds N) nil ->
-                tbounds_matches_cxt tbnds tcxt' ->
-                (forall P, In P Ps -> ok_p tcxt P) ->
-                (forall e_i Targ_i tcxt_i,
-                   In (e_i, Targ_i, tcxt_i) (combine (combine es Targs) tcxts) ->
-                   boundsOfTyp_matches_cxt Targ_i tcxt_i ->
-                   typing tcxt ecxt e_i Targ_i nil) ->
-                (let N_open := (open_n_with_names 0 N (dom tcxt')) in
-                  mtype m N_open (methBnds, Us, U)) ->
-                (forall Ys,
-                   distinct L (length methBnds) Ys ->
-                   let Us_open := open_ts_with_names 0 Us Ys in
-                   let Nargs := getNBodies Targs in
-                   let Nargs_open :=
-                     List.map
-                       (fun arg : (typ_n * cxt_t) =>
-                          let (N_i, tcxt_i) := arg in
-                            open_n_with_names 0 N_i (dom tcxt_i))
-                       (combine Nargs tcxts)
-                   in
-                     sift typ_n Nargs_open Us_open Ys Ns' Us' /\
-                     matching Ns' Us' Ps Ys Ts) ->
-                let tcxt'' := tcxt ++ tcxt' ++ (flatten tcxts) in
-                let Targs_NoRng := stripRanges Targs in
-                let Targs_NoRng_open :=
-                  List.map
-                    (fun arg : (typ * cxt_t) =>
-                       let (Targs_i, tcxt_i) := arg in
-                         open_t_with_names 0 Targs_i (dom tcxt_i))
-                    (combine Targs_NoRng tcxts)
-                in
-                let Us_open := (open_ts 0 Us Ts) in
-                let Bs_low_open :=
-                    List.map (fun arg : t_bound => let (b, t) := arg in open_b 0 b Ts) methBnds
-                in
-                let Ts_up_open  :=
-                    List.map (fun arg : t_bound => let (b, t) := arg in open_t 0 t Ts) methBnds
-                in
-                (forall Targ_i U_i B_low T_up T_i,
-                   In (Targ_i, U_i, B_low, T_up, T_i)
-                      (combine
-                         (combine
-                            (combine
-                               (combine Targs_NoRng_open Us_open)
-                               Bs_low_open)
-                            Ts_up_open)
-                         Ts) ->
-                   subtype_t tcxt'' Targ_i U_i ->
-                   subtype_b tcxt'' B_low (b_typ T_i) ->
-                   subtype_t tcxt'' T_i Targ_i) ->
-        (* -------------------------------------------------------------------------- *)
-                typing tcxt ecxt (e_minvk e m Ps es) (open_t 0 U Ts)
-                                                     (tcxt' ++ (flatten tcxts))
+| typing_invk :
+    forall tcxt ecxt e m Ps es tcxt' tcxts tbnds N
+           methBnds Us U Ts Targs Ns' Us' L,
+      (* Checking qualifier of method invocation *)
+      typing tcxt ecxt e (t_ext tbnds N) nil ->
+      tbounds_matches_cxt tbnds tcxt' ->
+
+      (* Checking type actuals of method invocation *)
+      wide_ok_p tcxt Ps ->
+
+      (* Checking expression actuals of method invocation *)
+      wide_typing tcxt ecxt es Targs nil ->
+      wide_boundsOfTyp_matches_cxt Targs tcxts ->
+
+      (* Method type look up *)
+      (let N_open := (open_n_with_names 0 N (dom tcxt')) in
+       mtype m N_open (methBnds, Us, U)) ->
+
+      (* Open bodies of types of expression actuals *)
+      let Targs_NoRng := stripRanges Targs in
+      let Targs_NoRng_open :=
+          List.map
+            (fun arg : (typ * cxt_t) =>
+               let (Targs_NoRng_i, tcxt_i) := arg in
+               open_t_with_names 0 Targs_NoRng_i (dom tcxt_i))
+            (combine Targs_NoRng tcxts)
+      in
+
+      (* Perform sifting and matching for wildcard capture *)
+      (forall Ys,
+         (* Choosing some arbitrary names for method type parameters *)
+         distinct L (length methBnds) Ys ->
+         (* Opening terms in method type signature *)
+         let methBnds_open     := open_t_bounds_with_names 0 methBnds Ys in
+         let Us_open           := open_ts_with_names 0 Us Ys in
+         let Nargs_Us_for_sift :=
+             filterPossibleSiftPairs (combine Targs_NoRng_open Us_open)
+         in
+         let Nargs_for_sift :=
+             List.map
+               (fun (arg: typ_n * typ) => let (n, u) := arg in n)
+               Nargs_Us_for_sift
+         in
+         let Us_for_sift :=
+             List.map
+               (fun (arg: typ_n * typ) => let (n, u) := arg in u)
+               Nargs_Us_for_sift
+         in
+         sift typ_n Nargs_for_sift Us_for_sift Ys Ns' Us' /\
+         matching Ns' Us' Ps Ys Ts) ->
+
+      (* Check inferred type actuals are within method bounds *)
+      let tcxt'' := tcxt ++ tcxt' ++ (flatten tcxts) in
+      let methBnds_open := open_t_bounds 0 tbnds Ts in
+      let lower_bounds := t_bounds_get_lower_bounds methBnds_open in
+      let upper_bounds := t_bounds_get_upper_bounds methBnds_open in
+      let Ts_as_Bs := List.map b_typ Ts in
+      wide_subtype_b tcxt'' lower_bounds Ts_as_Bs ->
+      wide_subtype_t tcxt'' Ts upper_bounds ->
+      
+      (* Check that the actual types are applicable subtypes
+       * of formal types *)
+      let Us_open := (open_ts 0 Us Ts) in
+      wide_subtype_t tcxt'' Targs_NoRng_open Us_open ->
+  (* ------------------------------------------------------------------ *)
+      typing tcxt ecxt (e_minvk e m Ps es) (open_t 0 U Ts)
+             (tcxt' ++ (flatten tcxts))
 
 
 with wide_typing :
@@ -276,7 +300,7 @@ Inductive method_typing : cxt_t -> methdef -> cname -> Prop :=
               let tcxt     := clsCxt ++ methCxt in
               ok_cxt_t clsCxt methCxt ->
               ok_t tcxt T_open ->
-              (forall T_i, In T_i Ts_open -> ok_t tcxt T_i) ->
+              wide_ok_t tcxt Ts_open ->
               (forall xs,
                  distinct (this::L_body) (length Ts) xs ->
                  let X_typs   := List.map (fun X => t_fvar X) Xs in
@@ -302,7 +326,7 @@ Inductive class_typing : classdef -> Prop :=
           (forall T_i, In T_i Ts_open -> mono_t clsVars Xs T_i) ->
           ok_cxt_t nil tcxt ->
           ok_n tcxt N_open ->
-          (forall T_i, In T_i Ts_open -> ok_t tcxt T_i) ->
+          wide_ok_t tcxt Ts_open ->
           (forall md, In md mds -> method_typing tcxt md C) ->
           class_typing (C, tvbnds, N, fds, mds).
 

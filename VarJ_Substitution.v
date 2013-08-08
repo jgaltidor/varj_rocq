@@ -168,6 +168,13 @@ Inductive boundsOfTyp_matches_cxt : typ -> cxt_t -> Prop :=
 | boundsOfTyp_matches_cxt_fvar :
     forall X, boundsOfTyp_matches_cxt (t_fvar X) nil.
 
+Inductive wide_boundsOfTyp_matches_cxt : list typ -> list cxt_t -> Prop :=
+| wide_boundsOfTyp_matches_cxt_nil : wide_boundsOfTyp_matches_cxt nil nil
+| wide_boundsOfTyp_matches_cxt_cons :
+    forall t ts tcxt tcxts,
+      boundsOfTyp_matches_cxt t tcxt ->
+      wide_boundsOfTyp_matches_cxt ts tcxts ->
+      wide_boundsOfTyp_matches_cxt (t::ts) (tcxt::tcxts).
 
 
 Fixpoint subst_t (xs: list tname) (ts: list typ) (t: typ) : typ :=

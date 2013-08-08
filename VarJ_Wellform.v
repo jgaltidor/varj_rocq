@@ -86,6 +86,13 @@ Inductive ok_p : cxt_t -> typ_p -> Prop :=
 | ok_p_t : forall tcxt t,
            ok_t tcxt t -> ok_p tcxt (p_typ t).
 
+Inductive wide_ok_p : cxt_t -> list typ_p -> Prop :=
+| wide_ok_p_nil : forall tcxt, wide_ok_p tcxt nil
+| wide_ok_p_cons :
+    forall tcxt p ps,
+      ok_p tcxt p ->
+      wide_ok_p tcxt ps ->
+      wide_ok_p tcxt (p::ps).
 
 Inductive ok_cxt_e : cxt_t -> cxt_e -> Prop :=
 | ok_cxt_e_nil : forall tcxt, ok_cxt_e tcxt nil
