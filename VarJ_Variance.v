@@ -166,12 +166,18 @@ Qed.
 
 Lemma var_lt_trans : forall (v1 v2 v3:variance), v1 < v2 -> v2 < v3 -> v1 < v3.
 Proof.
+  (*
+  intros v1 v2 v3 H1 H2.
+  destruct v1; destruct v2; destruct v3;
+  unfold var_lt in *; simpl in *; debug trivial.
+  *)
+
   intros v1 v2 v3.
   destruct v1;
   destruct v2;
   destruct v3;
   intros H1 H2;
-  auto.
+  trivial.
 Qed.
 
 

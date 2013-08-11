@@ -8,7 +8,6 @@ Require Import VarJ_Wellform.
 Require Import VarJ_Typing.
 Require Import VarJ_Reduction.
 
-
 (* Lemma 9 of TameFJ *)
 Lemma weakening_subtyping :
   forall tcxt tcxt' tcxt'' T T',
@@ -53,44 +52,32 @@ Proof.
   (* Case: typing_field *)
     exists nil, tbnds, N, T.
 
-    (* First simplify hypotheses *)
+    (* First simplify hypotheses *)    
     inversion HeqHe.
     rewrite -> H4 in *.
     rewrite -> H5 in *.
     unfold N_open in H0.
+    simpl in *.
 
     (* Simpify conclusion *)
-    assert (tcxt' ++ nil = tcxt') as H'.
-    apply app_nil_r.
-    rewrite -> H'.
-  
-      split.
-      apply H2.
-
-      split.
-      apply H1.
-
-      split.
-      apply H.
-
-      split.
-      apply H0.
-
-      apply subtype_t_refl.
+    ssimpl_list.
+    (* Remaining steps are simple. *)
+    auto.
 
    (* Case: typing_subs *)
       (* Simpilify goal *)
       simpl.
       remember (IHtyping HeqHe H0) as H'.
-      inversion H' as [tcxt_n' Htcxt_n'].
-      inversion Htcxt_n' as [tbnds' Htbnds'].
-      inversion Htbnds' as [N Hn].
-      inversion Hn as [U' Hu'].
+
+      (* Eliminating existential *)
+      inversion H' as
+          [tcxt_n'
+             [tbnds'
+                [N
+                   [U' Hu']]]].
       clear - H Hu' H1 H2 H3.
 
       exists (tcxt' ++ tcxt_n'), tbnds', N, U'.
-      split.
-      apply Hu'.
 
       split.
       apply Hu'.
@@ -99,27 +86,38 @@ Proof.
       apply Hu'.
 
       split.
+      apply Hu'.
+
+      split.
+      apply Hu'.
+
+      Check subtype_t_trans.
+      apply subtype_t_trans with (t2 := U).
       apply Hu'.
 
       assert
         (subtype_t ((tcxt ++ tcxt') ++ tcxt_n' ++ nil) U T)
         as Hweak.
+
+        Check weakening_subtyping.
         apply weakening_subtyping with
           (tcxt:=tcxt++tcxt') (tcxt':=nil) (tcxt'':=tcxt_n')
           (T:=U) (T':=T).
         ssimpl_list.
+
+        Check context_movement.
         apply context_movement.
         apply Hu'.
+
         ssimpl_list.
         apply H.
-
-      assert (tcxt ++ tcxt' ++ tcxt_n'
-              = (tcxt ++ tcxt') ++ tcxt_n' ++ nil) as Hlisteq.
-      ssimpl_list.
-      apply app_assoc.
-      rewrite <- Hlisteq in Hweak.
-      apply subtype_t_trans with (t2:=U).
-      apply Hu'.
+       
+      autorewrite with list in Hweak using simpl.
+      assert (((tcxt ++ tcxt') ++ tcxt_n') =
+               (tcxt ++ tcxt' ++ tcxt_n')) as Hlisteq.
+        symmetry.
+        apply app_assoc.
+      rewrite -> Hlisteq in Hweak.
       apply Hweak.
       (* Completed T-subs case; the last relevant case *)
 

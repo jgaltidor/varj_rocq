@@ -171,10 +171,31 @@ Hint Resolve subtype_t_refl
              subtype_t_n_right
              subtype_t_pack.
 
+Check subtype_t_trans.
+
+(* Using technique from UseAuto chapter of SF book by Pierce et al.
+ * to have a hint using a transitive rule without adding significantly
+ * slowing auto.
+ * Only applying subtype_t_trans when there is some evidence that
+ * this application might help.
+ *)
+Hint Extern 10 (subtype_t ?tcxt ?S ?U) =>
+  match goal with 
+  | H: subtype_t tcxt S ?T |- _ => apply (subtype_t_trans tcxt S T U)
+  | H: subtype_t tcxt ?T U |- _ => apply (subtype_t_trans tcxt S T U)
+  end.
+
+
 (* Adding non-transitive subtype_b rules *)
 Hint Resolve subtype_b_t
              subtype_b_bot
              subtype_b_lbound
              subtype_b_refl.
+
+Hint Extern 10 (subtype_b ?tcxt ?S ?U) =>
+  match goal with 
+  | H: subtype_b tcxt S ?T |- _ => apply (subtype_b_trans tcxt S T U)
+  | H: subtype_b tcxt ?T U |- _ => apply (subtype_b_trans tcxt S T U)
+  end.
 
 

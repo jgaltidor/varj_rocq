@@ -288,6 +288,17 @@ Hint Resolve typing_var
              typing_field
              typing_invk.
 
+Check typing_subs.
+
+(* Adding typing_subs as a hint only if there is evidence
+ * that this application might help.
+ *)
+Hint Extern 10 (typing ?tcxt ?ecxt ?e ?T nil) =>
+  match goal with 
+  | H: typing tcxt ecxt e ?U ?tcxt' |- _ =>
+         apply (typing_subs tcxt ecxt T U tcxt')
+  end.
+
 (* Override Check *)
 
 Inductive override : mname -> typ_n -> msig -> Prop :=
