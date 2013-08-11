@@ -56,6 +56,8 @@ Fixpoint stripRanges (ts:list typ) : list typ :=
 Definition tname_notInFV (x:tname) (ts:list typ) : Prop :=
   ~(In x (fv_ts ts)).
 
+Hint Unfold tname_notInFV.
+
 Inductive wide_tname_notInFV : list tname -> list typ -> Prop :=
 | wide_tname_notInFV_nil : forall ts, wide_tname_notInFV nil ts
 | wide_tname_notInFV_cons :
@@ -64,6 +66,7 @@ Inductive wide_tname_notInFV : list tname -> list typ -> Prop :=
       wide_tname_notInFV xs ts ->
       wide_tname_notInFV (x::xs) ts.
 
+Hint Constructors wide_tname_notInFV.
 
 Inductive sift (E:Type) : list E -> list typ -> list tname ->
                           list E -> list typ -> Prop :=
@@ -90,6 +93,8 @@ Inductive sift (E:Type) : list E -> list typ -> list tname ->
                       sift E (e::es) (u::us) ys es' us'.
 
 
+Hint Constructors sift.
+
 Inductive matchInputsOK (typeFormals:list typ) :
   list typ_p -> list tname -> list typ -> Prop :=
 | matchInputsOK_nil : matchInputsOK typeFormals nil nil nil
@@ -106,6 +111,8 @@ Inductive matchInputsOK (typeFormals:list typ) :
       matchInputsOK typeFormals ((p_typ t)::ps) (y::ys) (t::ts).
 
 
+Hint Constructors matchInputsOK.
+
 Inductive defsubtype_possible :
   typ_n -> typ -> list tname -> list typ -> Prop :=
 | defsubtype_possible_ext :
@@ -121,6 +128,7 @@ Inductive defsubtype_possible :
     forall N X ys ts,
       defsubtype_possible N (t_fvar X) ys ts.
 
+Hint Constructors defsubtype_possible.
 
 Inductive wide_defsubtype_possible :
   list typ_n -> list typ -> list tname -> list typ -> Prop :=
@@ -133,6 +141,7 @@ Inductive wide_defsubtype_possible :
       wide_defsubtype_possible ns us ys ts ->
       wide_defsubtype_possible (n::ns) (u::us) ys ts.
 
+Hint Constructors wide_defsubtype_possible.
 
 Definition matching (ns: list typ_n) (us: list typ) (ps: list typ_p)
   (ys: list tname) (ts: list typ) : Prop :=
@@ -142,6 +151,7 @@ Definition matching (ns: list typ_n) (us: list typ) (ps: list typ_p)
     /\
     wide_tname_notInFV ys ts.
 
+Hint Unfold matching.
 
 Fixpoint filterPossibleSiftPairs (typePairs: list (typ * typ)) :
   (list (typ_n * typ)) :=
@@ -265,6 +275,18 @@ with wide_typing :
       wide_typing tcxt ecxt es ts tcxt' ->
       wide_typing tcxt ecxt (e::es) (t::ts) tcxt'.
 
+Hint Constructors wide_typing.
+
+(* Adding all typing constructors except typing_subs
+ * as hints. typing_subs is a subsumption rule that
+ * causes typing rules not to be syntax directed and
+ * may cause the run time of auto to be too slow.
+ *)
+
+Hint Resolve typing_var
+             typing_new
+             typing_field
+             typing_invk.
 
 (* Override Check *)
 
@@ -279,6 +301,7 @@ Inductive override : mname -> typ_n -> msig -> Prop :=
                no_binds m mds ->
                override m (n_typ C ts) sig.
 
+Hint Constructors override.
 
 Inductive method_typing : cxt_t -> methdef -> cname -> Prop :=
 | w_meth : forall clsCxt m methBnds T Ts e C clsTVBnds
@@ -309,6 +332,7 @@ Inductive method_typing : cxt_t -> methdef -> cname -> Prop :=
                  typing tcxt ecxt e T nil)) ->
            method_typing clsCxt (m, (methBnds, T, Ts, e)) C.
 
+Hint Constructors method_typing.
 
 Inductive class_typing : classdef -> Prop :=
 | w_cls : forall C tvbnds N fds mds L Xs,
@@ -330,9 +354,12 @@ Inductive class_typing : classdef -> Prop :=
           (forall md, In md mds -> method_typing tcxt md C) ->
           class_typing (C, tvbnds, N, fds, mds).
 
+Hint Constructors class_typing.
 
 Definition CT_isOK : Prop :=
   forall C Cdef, In (C, Cdef) CT -> class_typing Cdef.
+
+Hint Unfold CT_isOK.
 
 (* All lemmas should assume the class table is well-formed *)
 Parameter classTableOK : CT_isOK.

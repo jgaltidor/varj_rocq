@@ -154,3 +154,27 @@ with wide_var_subtype :
       wide_var_subtype tcxt vs ts ts' ->
       wide_var_subtype tcxt (v::vs) (t::ts) (t'::ts').
 
+(* Adding inductive types without transitive rules/constructor to hints *)
+Hint Constructors    subtype_n
+                  (* skipping subtype_t because of subtype_t_trans *)
+                  (* skipping subtype_b because of subtype_b_trans *)
+                     var_subtype
+                     wide_subtype_t
+                     wide_subtype_b
+                     wide_subtype_n
+                     wide_var_subtype.
+
+(* Adding non-transitive subtype_t rules *)
+Hint Resolve subtype_t_refl
+             subtype_t_ubound
+             subtype_t_n_left
+             subtype_t_n_right
+             subtype_t_pack.
+
+(* Adding non-transitive subtype_b rules *)
+Hint Resolve subtype_b_t
+             subtype_b_bot
+             subtype_b_lbound
+             subtype_b_refl.
+
+

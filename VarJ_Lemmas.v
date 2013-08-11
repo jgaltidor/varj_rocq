@@ -127,3 +127,5 @@ Proof.
   inversion HeqHe.
 Qed.
 
+Hint Resolve inversion_field.
+

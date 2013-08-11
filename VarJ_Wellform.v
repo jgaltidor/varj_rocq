@@ -13,6 +13,8 @@ Inductive ubound_t : cxt_t -> typ -> typ -> Prop :=
 
 | ubound_t_ext : forall tcxt tbnds N,
                  ubound_t tcxt (t_ext tbnds N) (t_ext tbnds N).
+
+Hint Constructors ubound_t.
                    
 Inductive ubound_b : cxt_t -> typ_b -> typ_b -> Prop :=
 | ubound_b_bot : forall tcxt,
@@ -21,6 +23,8 @@ Inductive ubound_b : cxt_t -> typ_b -> typ_b -> Prop :=
 | ubound_b_t : forall tcxt t t',
                ubound_t tcxt t t' ->
                ubound_b tcxt (b_typ t) (b_typ t').
+
+Hint Constructors ubound_b.
 
 Inductive ok_t : cxt_t -> typ -> Prop :=
 | ok_t_fvar : forall tcxt X, In X (dom tcxt) -> ok_t tcxt (t_fvar X)
@@ -80,11 +84,19 @@ with wide_ok_t : cxt_t -> list typ -> Prop :=
       wide_ok_t tcxt ts ->
       wide_ok_t tcxt (t::ts).
 
+Hint Constructors ok_t
+                  ok_n
+                  ok_b
+                  ok_cxt_t
+                  wide_ok_t.
+
 Inductive ok_p : cxt_t -> typ_p -> Prop :=
 | ok_p_inf : forall tcxt, ok_p tcxt p_inf
 
 | ok_p_t : forall tcxt t,
            ok_t tcxt t -> ok_p tcxt (p_typ t).
+
+Hint Constructors ok_p.
 
 Inductive wide_ok_p : cxt_t -> list typ_p -> Prop :=
 | wide_ok_p_nil : forall tcxt, wide_ok_p tcxt nil
@@ -94,6 +106,8 @@ Inductive wide_ok_p : cxt_t -> list typ_p -> Prop :=
       wide_ok_p tcxt ps ->
       wide_ok_p tcxt (p::ps).
 
+Hint Constructors wide_ok_p.
+
 Inductive ok_cxt_e : cxt_t -> cxt_e -> Prop :=
 | ok_cxt_e_nil : forall tcxt, ok_cxt_e tcxt nil
 
@@ -102,4 +116,6 @@ Inductive ok_cxt_e : cxt_t -> cxt_e -> Prop :=
                   ok_t tcxt t ->
                   ok_cxt_e tcxt ecxt ->
                   ok_cxt_e tcxt ((x, t)::ecxt).
+
+Hint Constructors ok_cxt_e.
 

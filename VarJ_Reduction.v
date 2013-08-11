@@ -79,3 +79,5 @@ with wide_step : list exp -> list exp -> Prop :=
                      wide_step es es' ->
                      wide_step (e::es) (e::es').
 
+Hint Constructors step wide_step.
+
