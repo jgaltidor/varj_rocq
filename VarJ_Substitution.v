@@ -158,6 +158,7 @@ Definition openToCtxt_tvbounds (k:nat) (names : list tname) (tvbnds: tv_bounds) 
 Definition tbounds_matches_cxt (tbnds : t_bounds) (tcxt : cxt_t) : Prop :=
   (openToCtxt_tbounds 0 (dom tcxt) tbnds) = tcxt.
 
+Hint Unfold tbounds_matches_cxt.
 
 Inductive boundsOfTyp_matches_cxt : typ -> cxt_t -> Prop :=
 | boundsOfTyp_matches_cxt_ext :
@@ -168,6 +169,8 @@ Inductive boundsOfTyp_matches_cxt : typ -> cxt_t -> Prop :=
 | boundsOfTyp_matches_cxt_fvar :
     forall X, boundsOfTyp_matches_cxt (t_fvar X) nil.
 
+Hint Constructors boundsOfTyp_matches_cxt.
+
 Inductive wide_boundsOfTyp_matches_cxt : list typ -> list cxt_t -> Prop :=
 | wide_boundsOfTyp_matches_cxt_nil : wide_boundsOfTyp_matches_cxt nil nil
 | wide_boundsOfTyp_matches_cxt_cons :
@@ -176,6 +179,7 @@ Inductive wide_boundsOfTyp_matches_cxt : list typ -> list cxt_t -> Prop :=
       wide_boundsOfTyp_matches_cxt ts tcxts ->
       wide_boundsOfTyp_matches_cxt (t::ts) (tcxt::tcxts).
 
+Hint Constructors wide_boundsOfTyp_matches_cxt.
 
 Fixpoint subst_t (xs: list tname) (ts: list typ) (t: typ) : typ :=
   let subst_t_bound :=

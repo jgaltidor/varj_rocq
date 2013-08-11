@@ -128,6 +128,12 @@ Inductive value : exp -> Prop :=
 | value_new : forall N es,
     (forall e, In e es -> value e) -> value (e_new N es).
 
+(* Adding constructors for value to the core hint
+ * database.
+ *)
+Hint Constructors value.
+
+(* Print HintDb core. *)
 
 Notation fielddef := (fname * typ).
 
@@ -196,6 +202,8 @@ Inductive VT : cname -> list variance -> Prop :=
 | VT_lookup : forall C tvbnds N fds mds,
               binds C (C, tvbnds, N, fds, mds) CT ->
               VT C (tvbounds_vars tvbnds).
+
+Hint Constructors VT.
 
 Definition fielddef_name (fd:fielddef) : fname :=
   let (f, _) := fd in f.
