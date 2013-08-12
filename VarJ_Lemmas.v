@@ -15,6 +15,10 @@ Lemma weakening_subtyping :
   subtype_t (tcxt ++ tcxt') T T' ->
   subtype_t (tcxt ++ tcxt'' ++ tcxt') T T'.
 Proof.
+  (*
+  intros tcxt tcxt' tcxt'' T T' H1 H2.
+  induction H2.
+  *)
   admit.
 Qed.
 
@@ -65,61 +69,61 @@ Proof.
     auto.
 
    (* Case: typing_subs *)
-      (* Simpilify goal *)
-      simpl.
-      remember (IHtyping HeqHe H0) as H'.
+   (* Simpilify goal *)
+    simpl.
+    remember (IHtyping HeqHe H0) as H'.
 
-      (* Eliminating existential *)
-      inversion H' as
-          [tcxt_n'
-             [tbnds'
-                [N
-                   [U' Hu']]]].
-      clear - H Hu' H1 H2 H3.
+    (* Eliminating existential *)
+    inversion H' as
+        [tcxt_n'
+           [tbnds'
+              [N
+                 [U' Hu']]]].
+    clear - H Hu' H1 H2 H3.
 
-      exists (tcxt' ++ tcxt_n'), tbnds', N, U'.
+    exists (tcxt' ++ tcxt_n'), tbnds', N, U'.
 
-      split.
-      apply Hu'.
+    split.
+    apply Hu'.
 
-      split.
-      apply Hu'.
+    split.
+    apply Hu'.
 
-      split.
-      apply Hu'.
+    split.
+    apply Hu'.
 
-      split.
-      apply Hu'.
+    split.
+    apply Hu'.
 
-      Check subtype_t_trans.
-      apply subtype_t_trans with (t2 := U).
-      apply Hu'.
+    apply subtype_t_trans with (t2 := U).
+    apply Hu'.
 
-      assert
-        (subtype_t ((tcxt ++ tcxt') ++ tcxt_n' ++ nil) U T)
-        as Hweak.
+    assert
+      (subtype_t ((tcxt ++ tcxt') ++ tcxt_n' ++ nil) U T)
+      as Hweak.
 
-        Check weakening_subtyping.
-        apply weakening_subtyping with
-          (tcxt:=tcxt++tcxt') (tcxt':=nil) (tcxt'':=tcxt_n')
-          (T:=U) (T':=T).
-        ssimpl_list.
+      apply weakening_subtyping with
+        (tcxt:=tcxt++tcxt') (tcxt':=nil) (tcxt'':=tcxt_n')
+        (T:=U) (T':=T).
+      ssimpl_list.
+      (* Proved assertion *)
 
-        Check context_movement.
-        apply context_movement.
-        apply Hu'.
+    Check context_movement.
+    apply context_movement.
+    apply Hu'.
 
-        ssimpl_list.
-        apply H.
-       
-      autorewrite with list in Hweak using simpl.
-      assert (((tcxt ++ tcxt') ++ tcxt_n') =
-               (tcxt ++ tcxt' ++ tcxt_n')) as Hlisteq.
-        symmetry.
-        apply app_assoc.
-      rewrite -> Hlisteq in Hweak.
-      apply Hweak.
-      (* Completed T-subs case; the last relevant case *)
+    ssimpl_list.
+    apply H.
+   
+    autorewrite with list in Hweak using simpl.
+    assert (((tcxt ++ tcxt') ++ tcxt_n') =
+            (tcxt ++ tcxt' ++ tcxt_n')) as Hlisteq.
+      symmetry.
+      apply app_assoc.
+
+    rewrite -> Hlisteq in Hweak.
+    apply Hweak.
+    (* Completed T-subs case; the last relevant case *)
 
   (* Impossible case: typing_invk *)
   inversion HeqHe.
