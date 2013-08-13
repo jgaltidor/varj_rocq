@@ -71,6 +71,8 @@ Proof.
    (* Case: typing_subs *)
    (* Simpilify goal *)
     simpl.
+
+    (* Apply induction hypothesis *)
     remember (IHtyping HeqHe H0) as H'.
 
     (* Eliminating existential *)
@@ -106,14 +108,13 @@ Proof.
         (tcxt:=tcxt++tcxt') (tcxt':=nil) (tcxt'':=tcxt_n')
         (T:=U) (T':=T).
       ssimpl_list.
+
+      apply context_movement.
+      apply Hu'.
+
+      ssimpl_list.
+      apply H.
       (* Proved assertion *)
-
-    Check context_movement.
-    apply context_movement.
-    apply Hu'.
-
-    ssimpl_list.
-    apply H.
    
     autorewrite with list in Hweak using simpl.
     assert (((tcxt ++ tcxt') ++ tcxt_n') =

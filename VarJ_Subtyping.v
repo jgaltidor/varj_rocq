@@ -171,8 +171,6 @@ Hint Resolve subtype_t_refl
              subtype_t_n_right
              subtype_t_pack.
 
-Check subtype_t_trans.
-
 (* Using technique from UseAuto chapter of SF book by Pierce et al.
  * to have a hint using a transitive rule without adding significantly
  * slowing auto.

@@ -288,8 +288,6 @@ Hint Resolve typing_var
              typing_field
              typing_invk.
 
-Check typing_subs.
-
 (* Adding typing_subs as a hint only if there is evidence
  * that this application might help.
  *)
