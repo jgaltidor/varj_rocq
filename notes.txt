@@ -1,0 +1,2 @@
+Defining lc_t requires not using the list type
+to define existential types.
