@@ -72,8 +72,6 @@ Notation t_bound := (typ_b * typ).
 (** Represents list of lower and upper bounds of type parameters *)
 Notation t_bounds := (list t_bound).
 
-Print List.nth.
-
 
 (** Opening for types *)
 Fixpoint open_t (k:nat) (t:typ) (ts:list typ) {struct t} : typ :=
@@ -164,7 +162,7 @@ Definition open_t_bounds_with_names (k:nat) (tbnds:t_bounds) (names:list tname) 
 
 (** Implementing distinct predicate based on its definition
   * in the paper (Arthur Chargueraud, 2012).
-  * distinct predicate is used for co-finite quantification.
+  * distinct is used for co-finite quantification.
   *) 
 Inductive distinct (A:Type) : list A -> nat -> list A -> Prop :=
 | distinct_nil  : forall L, distinct L 0 nil
@@ -178,13 +176,24 @@ Hint Constructors distinct.
 
 Inductive lc_t : typ -> Prop :=
 | lc_t_fvar :
-    forall X,
-      lc_t (t_fvar X)
+    forall X, lc_t (t_fvar X)
+
 | lc_t_ext :
-    forall bnds N,
-      (forall bnd, In bnd bnds -> bodies_bnd (length bnds) bnd) ->
-      bodies_n (length bnds) N ->
-      lc_t (t_ext bnds N)
+    forall bnds N L xs,
+        distinct L (length bnds) xs ->
+        lc_n (open_n_with_names 0 N xs) ->
+        (forall (bnd : t_bound),
+           In bnd bnds ->
+           let (b_lower, t_upper) := bnd in
+           lc_b (open_b_with_names 0 b_lower xs)) ->
+        (forall (bnd : t_bound),
+           In bnd bnds ->
+           let (b_lower, t_upper) := bnd in
+           lc_t (open_t_with_names 0 t_upper xs)) ->
+  (* ------------------------------------------------- *)
+        lc_t (t_ext bnds N)
+
+
 (* note no rule for t_bvar *)
 
 with lc_n : typ_n -> Prop :=
@@ -196,9 +205,10 @@ with lc_n : typ_n -> Prop :=
 with lc_b : typ_b -> Prop :=
 | lc_b_typ :
     forall t,
-      lc_t ->
+      lc_t t ->
       lc_b (b_typ t)
-| lc_b_bot : lc_b b_bot
+
+| lc_b_bot : lc_b b_bot.
 
 with Definition bodies_t (n:nat) (t: typ) : Prop :=
   exists L,
