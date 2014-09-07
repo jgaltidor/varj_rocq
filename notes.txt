@@ -7,3 +7,7 @@ defined list (not using the list type) so that
 inference rules do not depend on using the
 "In" predicate.
 
+
+Use the list type if you have to perform a lookup.
+More generally, use the list type if a test for
+checking membership of a list is required.
