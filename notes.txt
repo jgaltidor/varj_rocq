@@ -1,13 +1,9 @@
 Defining lc_t requires not using the list type
 to define existential types.
 
-It is better to define wide judgments or
-judgments over customly
-defined list (not using the list type) so that
-inference rules do not depend on using the
-"In" predicate.
+It is better to define wide judgments or judgments
+over list so that inference rules do not depend on
+using the "In" predicate.
 
-
-Use the list type if you have to perform a lookup.
-More generally, use the list type if a test for
-checking membership of a list is required.
+Use the "In" predicate only when there is an element
+that may not be in the list.

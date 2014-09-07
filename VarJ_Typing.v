@@ -1,6 +1,7 @@
 (* Typing Judgments *)
 
 Require Import VarJ_Syntax.
+Require Import VarJ_OpenClose.
 Require Import VarJ_Substitution.
 Require Import VarJ_Variance.
 Require Import VarJ_Subtyping.
@@ -322,8 +323,8 @@ Inductive method_typing : cxt_t -> methdef -> cname -> Prop :=
            let clsVarsNegated := negateVars clsVars in
            let Xs := dom clsCxt in
            mono_t clsVars Xs T ->
-           (forall T_i, In T_i Ts -> mono_t clsVarsNegated Xs T_i) ->
-           mono_t_bounds clsVarsNegated Xs methBnds  ->
+           mono_t_wide clsVarsNegated Xs Ts ->
+           mono_t_bound_wide clsVarsNegated Xs methBnds  ->
            (forall Ys,
               distinct L_bnds (length methBnds) Ys ->
               let methCxt  := openToCtxt_tbounds 0 Ys methBnds in
@@ -343,6 +344,18 @@ Inductive method_typing : cxt_t -> methdef -> cname -> Prop :=
 
 Hint Constructors method_typing.
 
+Inductive method_typing_wide : cxt_t -> cname -> list methdef -> Prop :=
+| method_typing_wide_nil :
+    forall tcxt C,
+    method_typing_wide tcxt C nil
+
+| method_typing_wide_cons :
+    forall tcxt C md mds,
+      method_typing tcxt md C ->
+      method_typing_wide tcxt C mds ->
+      method_typing_wide tcxt C (md::mds).
+
+
 Inductive class_typing : classdef -> Prop :=
 | w_cls : forall C tvbnds N fds mds L Xs,
           distinct L (length tvbnds) Xs ->
@@ -356,20 +369,27 @@ Inductive class_typing : classdef -> Prop :=
           let tcxt := openToCtxt_tvbounds 0 Xs tvbnds in
           let clsVars := tvbounds_vars tvbnds in
           mono_n clsVars Xs N_open ->
-          (forall T_i, In T_i Ts_open -> mono_t clsVars Xs T_i) ->
+          mono_t_wide clsVars Xs Ts_open ->
           ok_cxt_t nil tcxt ->
           ok_n tcxt N_open ->
           wide_ok_t tcxt Ts_open ->
-          (forall md, In md mds -> method_typing tcxt md C) ->
+          method_typing_wide tcxt C mds ->
           class_typing (C, tvbnds, N, fds, mds).
 
 Hint Constructors class_typing.
 
-Definition CT_isOK : Prop :=
-  forall C Cdef, In (C, Cdef) CT -> class_typing Cdef.
+Inductive CT_isOK : list (cname * classdef) -> Prop :=
+| CT_isOK_nil : CT_isOK nil
 
-Hint Unfold CT_isOK.
+| CT_isOK_cons :
+    forall C Cdef CT,
+      class_typing Cdef ->
+      CT_isOK CT ->
+ (* ------------------------ *)
+      CT_isOK ((C, Cdef)::CT).
+
+Hint Constructors CT_isOK.
 
 (* All lemmas should assume the class table is well-formed *)
-Parameter classTableOK : CT_isOK.
+Parameter classTableOK : CT_isOK CT.
 

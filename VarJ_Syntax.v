@@ -72,172 +72,6 @@ Notation t_bound := (typ_b * typ).
 (** Represents list of lower and upper bounds of type parameters *)
 Notation t_bounds := (list t_bound).
 
-
-(** Opening for types *)
-Fixpoint open_t (k:nat) (t:typ) (ts:list typ) {struct t} : typ :=
-  let open_t_bound :=
-    fun (k:nat) (tbnd:t_bound) (ts:list typ) =>
-      let (b, t) := tbnd in (open_b k b ts, open_t k t ts)
-  in
-  let open_t_bounds :=
-    fun (k:nat) (tbnds:t_bounds) (ts:list typ) =>
-      List.map (fun tbnd => open_t_bound k tbnd ts) tbnds
-  in
-  match t with
-    | t_ext bounds N =>
-        t_ext (open_t_bounds (S k) bounds ts) (open_n (S k) N ts)
-    | t_bvar n1 n2 =>
-        match (nat_compare n1 k) with
-          | Eq => List.nth n2 ts t
-          | _  => t
-          end
-    | t_fvar x => t
-  end
-
-with open_b (k:nat) (B:typ_b) (ts:list typ) {struct B} : typ_b :=
-  match B with
-    | b_typ t => b_typ (open_t k t ts)
-    | b_bot   => b_bot
-  end
-
-with open_n (k:nat) (N:typ_n) (ts:list typ) {struct N} : typ_n :=
-  match N with n_typ C ts' =>
-    n_typ C (List.map (fun t => open_t k t ts) ts')
-  end.
-
-Definition open_p (k:nat) (p:typ_p) (ts:list typ) : typ_p :=
-  match p with
-    | p_typ t => p_typ (open_t k t ts)
-    | p_inf => p_inf
-  end.
-
-Definition open_r (k:nat) (r:typ_r) (ts:list typ) : typ_r :=
-  match r with
-    | typ_r_n N => typ_r_n (open_n k N ts)
-    | typ_r_fvar X => r
-  end.
-
-Definition open_ts (k:nat) (ts':list typ) (ts:list typ) : list typ :=
-  List.map (fun t => open_t k t ts) ts'.
-
-Definition open_ps (k:nat) (ps:list typ_p) (ts:list typ) : list typ_p :=
-  List.map (fun p => open_p k p ts) ps.
-
-Definition open_bs (k:nat) (bs:list typ_b) (ts:list typ) : list typ_b :=
-  List.map (fun b => open_b k b ts) bs.
-
-Definition open_ns (k:nat) (ns:list typ_n) (ts:list typ) : list typ_n :=
-  List.map (fun n => open_n k n ts) ns.
-
-Definition open_t_bound (k:nat) (tbnd:t_bound) (ts:list typ) : t_bound :=
-  let (b, t) := tbnd in (open_b k b ts, open_t k t ts).
-
-Definition open_t_bounds (k:nat) (tbnds:t_bounds) (ts:list typ) : t_bounds :=
-  List.map (fun tbnd => open_t_bound k tbnd ts) tbnds.
-
-Definition names2fvars_t (names: list tname) : list typ :=
-  List.map (fun X => t_fvar X) names.
-
-Definition open_t_with_names (k:nat) (t:typ) (names:list tname) :=
-  (open_t k t (names2fvars_t names)).
-
-Definition open_n_with_names (k:nat) (n:typ_n) (names:list tname) :=
-  (open_n k n (names2fvars_t names)).
-
-Definition open_b_with_names (k:nat) (b:typ_b) (names:list tname) :=
-  (open_b k b (names2fvars_t names)).
-
-Definition open_ts_with_names (k:nat) (ts:list typ) (names:list tname) :=
-  (open_ts k ts (names2fvars_t names)).
-
-Definition open_ns_with_names (k:nat) (ns:list typ_n) (names:list tname) :=
-  (open_ns k ns (names2fvars_t names)).
-
-Definition open_t_bound_with_names (k:nat) (tbnd:t_bound) (names:list tname) :=
-  (open_t_bound k tbnd (names2fvars_t names)).
-
-
-Definition open_t_bounds_with_names (k:nat) (tbnds:t_bounds) (names:list tname) :=
-  (open_t_bounds k tbnds (names2fvars_t names)).
-
-(** Implementing distinct predicate based on its definition
-  * in the paper (Arthur Chargueraud, 2012).
-  * distinct is used for co-finite quantification.
-  *) 
-Inductive distinct (A:Type) : list A -> nat -> list A -> Prop :=
-| distinct_nil  : forall L, distinct L 0 nil
-| distinct_cons : forall L n x xs,
-                  ~(In x L) ->
-                  distinct (x::L) n xs ->
-                  distinct L (S n) (x::xs).
-
-Hint Constructors distinct.
-
-
-Inductive lc_t : typ -> Prop :=
-| lc_t_fvar :
-    forall X, lc_t (t_fvar X)
-
-| lc_t_ext :
-    forall bnds N L xs,
-        distinct L (length bnds) xs ->
-        lc_n (open_n_with_names 0 N xs) ->
-        (forall (bnd : t_bound),
-           In bnd bnds ->
-           let (b_lower, t_upper) := bnd in
-           lc_b (open_b_with_names 0 b_lower xs)) ->
-        (forall (bnd : t_bound),
-           In bnd bnds ->
-           let (b_lower, t_upper) := bnd in
-           lc_t (open_t_with_names 0 t_upper xs)) ->
-  (* ------------------------------------------------- *)
-        lc_t (t_ext bnds N)
-
-
-(* note no rule for t_bvar *)
-
-with lc_n : typ_n -> Prop :=
-| lc_n_typ :
-    forall C ts,
-      (forall t, In t ts -> lc_t t) ->
-      lc_n (n_typ C ts)
-
-with lc_b : typ_b -> Prop :=
-| lc_b_typ :
-    forall t,
-      lc_t t ->
-      lc_b (b_typ t)
-
-| lc_b_bot : lc_b b_bot.
-
-with Definition bodies_t (n:nat) (t: typ) : Prop :=
-  exists L,
-    forall xs,
-      distinct L n xs ->
-        lc_t (open_t_with_names 0 t xs)
-
-with bodies_n (n:nat) (N: typ) : Prop :=
-  exists L,
-    forall xs,
-      distinct L n xs ->
-        lc_n (open_n_with_names 0 N xs)
-
-with bodies_b (n:nat) (b: typ_b) : Prop :=
-  exists L,
-    forall xs,
-      distinct L n xs ->
-        lc_b (open_b_with_names 0 b xs)
-
-with bodies_bnd (n:nat) (bnd: t_bound) : Prop :=
-  let (b, t) := tbnd in
-  (bodies_b n b /\ bodies_t n t).
-
-
-
-
-
-Print List.forall.
-
 Definition t_bound_get_lower_bound (tbnd: t_bound) :=
   let (lower, upper) := tbnd in lower.
 
@@ -249,8 +83,6 @@ Definition t_bounds_get_lower_bounds (tbnds: t_bounds) :=
 
 Definition t_bounds_get_upper_bounds (tbnds: t_bounds) :=
   List.map t_bound_get_upper_bound tbnds.
-
-
 
 Inductive variance : Set :=
 | covar : variance
@@ -291,8 +123,20 @@ Inductive exp : Set :=
 
 (* Values *)
 Inductive value : exp -> Prop :=
-| value_new : forall N es,
-    (forall e, In e es -> value e) -> value (e_new N es).
+| value_new :
+    forall N es,
+      value_wide es ->
+ (* ---------------------- *)
+      value (e_new N es)
+
+with value_wide : list exp -> Prop :=
+| value_wide_nil : value_wide nil
+| value_wide_cons :
+    forall e es,
+      value e ->
+      value_wide es ->
+ (* ---------------------- *)
+      value_wide (e::es).
 
 (* Adding constructors for value to the core hint
  * database.
@@ -441,4 +285,13 @@ Definition fv_r (r:typ_r) : list tname :=
     | typ_r_n N => fv_n N
     | typ_r_fvar X => X::nil
   end.
+
+(** Auxiliaries *)
+
+Fixpoint flatten (A: Type) (ll: list (list A)): list A :=
+  match ll with
+  | nil => nil
+  | hd :: tl => hd ++ (flatten tl)
+  end.
+
 

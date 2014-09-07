@@ -1,6 +1,7 @@
 (* Reduction (Evalution) Semantics *)
 
 Require Import VarJ_Syntax.
+Require Import VarJ_OpenClose.
 Require Import VarJ_Substitution.
 Require Import VarJ_Subtyping.
 Require Import VarJ_Lookup.
@@ -22,15 +23,15 @@ Inductive step : exp -> exp -> Prop :=
 (* Computation Rules *)
 
 | r_field : forall C ts es f v fds,
-            (forall e, In e es -> value e) ->
+            value_wide es ->
             fields C fds ->
             binds f v (combine (dom fds) es) ->
       (* --------------------------------------------- *)
             step (e_field (e_new (n_typ C ts) es) f) v
 
 | r_invk : forall N es' m Ps es e_0 Ts methBnds Us U Ns' Us' L,
-           (forall e, In e es' -> value e) ->
-           (forall e, In e es -> value e) ->
+           value_wide es' ->
+           value_wide es ->
            mbody m N e_0 ->
            mtype m N (methBnds, Us, U) ->
            (forall Ys,
@@ -44,7 +45,6 @@ Inductive step : exp -> exp -> Prop :=
                 (let e_0_v  := open_e 0 e_0 es in
                  let e_0_vt := open_e_t 0 e_0_v Ts in
                  (subst_e (this::nil) ((e_new N es')::nil) e_0_vt))
-
 
 (* Congruence Rules *)
 

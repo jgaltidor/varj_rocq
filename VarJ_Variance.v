@@ -33,10 +33,12 @@ Hint Unfold var_lt.
 
 Inductive wide_var_lt : list variance -> list variance -> Prop :=
 | wide_var_lt_nil  : wide_var_lt nil nil
-| wide_var_lt_cons : forall v vs v' vs',
-                      var_lt v v' ->
-                      wide_var_lt vs vs' ->
-                      wide_var_lt (v::vs) (v'::vs').
+| wide_var_lt_cons :
+    forall v vs v' vs',
+      var_lt v v' ->
+      wide_var_lt vs vs' ->
+ (* ---------------------------------- *)
+      wide_var_lt (v::vs) (v'::vs').
 
 Hint Constructors wide_var_lt.
 
@@ -48,10 +50,12 @@ Hint Unfold var_leq.
 
 Inductive wide_var_leq : list variance -> list variance -> Prop :=
 | wide_var_leq_nil  : wide_var_leq nil nil
-| wide_var_leq_cons : forall v vs v' vs',
-                       var_leq v v' ->
-                       wide_var_leq vs vs' ->
-                       wide_var_leq (v::vs) (v'::vs').
+| wide_var_leq_cons :
+    forall v vs v' vs',
+      var_leq v v' ->
+      wide_var_leq vs vs' ->
+ (* ----------------------------------- *)
+      wide_var_leq (v::vs) (v'::vs').
 
 Hint Constructors wide_var_leq.
 
@@ -201,53 +205,89 @@ Qed.
 
 
 Inductive var_t : tname -> typ -> variance -> Prop :=
-| var_t_xx : forall X, var_t X (t_fvar X) covar
-| var_t_xy : forall X Y,
-             X <> Y -> var_t X (t_fvar Y) bivar
-| var_t_bvar : forall X n1 n2,
-               var_t X (t_bvar n1 n2) bivar
-| var_t_ext : forall X tbnds N v1 v2,
-              var_t_bounds X tbnds v1 ->
-              var_n X N v2 ->
-              var_t X (t_ext tbnds N) (var_meet_op v1 v2)
+| var_t_xx :
+    forall X,
+ (* --------------------------- *)
+      var_t X (t_fvar X) covar
+| var_t_xy :
+    forall X Y,
+      X <> Y ->
+ (* --------------------------- *)
+      var_t X (t_fvar Y) bivar
+| var_t_bvar :
+    forall X n1 n2,
+ (* ---------------------------------- *)
+      var_t X (t_bvar n1 n2) bivar
+
+| var_t_ext :
+    forall X tbnds N v1 v2,
+      var_t_bounds X tbnds v1 ->
+      var_n X N v2 ->
+ (* ------------------------------------------------ *)
+      var_t X (t_ext tbnds N) (var_meet_op v1 v2)
 
 with var_n : tname -> typ_n -> variance -> Prop :=
-| var_n_typ : forall X C ts dvars varsOfActuals,
-              VT C dvars ->
-              var_ts X ts varsOfActuals ->
-              let vs := wide_var_transform_op dvars varsOfActuals in
-              var_n X (n_typ C ts) (var_meet_list_op vs)
+| var_n_typ :
+    forall X C ts dvars varsOfActuals,
+      VT C dvars ->
+      var_ts X ts varsOfActuals ->
+ (* ---------------------------------------------------------- *)
+      let vs := wide_var_transform_op dvars varsOfActuals in
+      var_n X (n_typ C ts) (var_meet_list_op vs)
 
 with var_b : tname -> typ_b -> variance -> Prop :=
-| var_b_bot : forall X, var_b X b_bot bivar
-| var_b_typ : forall X t v,
-              var_t X t v -> var_b X (b_typ t) v
+| var_b_bot :
+    forall X,
+ (* --------------------------- *)
+      var_b X b_bot bivar
+| var_b_typ :
+    forall X t v,
+ (* --------------------------------------- *)
+      var_t X t v -> var_b X (b_typ t) v
 
 with var_t_bound : tname -> t_bound -> variance -> Prop :=
-| var_t_bound_def : forall X b t vb vt,
-                    var_b X b vb ->
-                    var_t X t vt ->
-                    let vb_flip := var_transform_op contravar vb in
-                    var_t_bound X (b, t) (var_meet_op vb_flip vt)
+| var_t_bound_def :
+    forall X b t vb vt,
+      var_b X b vb ->
+      var_t X t vt ->
+ (* ------------------------------------------------------ *)
+      let vb_flip := var_transform_op contravar vb in
+      var_t_bound X (b, t) (var_meet_op vb_flip vt)
 
 with var_t_bounds : tname -> t_bounds -> variance -> Prop :=
-| var_t_bounds_nil : forall X, var_t_bounds X nil bivar
-| var_t_bounds_cons : forall X tbnd tbnds v1 v2,
-                      var_t_bound X tbnd v1 ->
-                      var_t_bounds X tbnds v2 ->
-                      var_t_bounds X (tbnd::tbnds) (var_meet_op v1 v2)
+| var_t_bounds_nil :
+    forall X,
+ (* --------------------------- *)
+      var_t_bounds X nil bivar
+| var_t_bounds_cons :
+    forall X tbnd tbnds v1 v2,
+      var_t_bound X tbnd v1 ->
+      var_t_bounds X tbnds v2 ->
+ (* --------------------------- *)
+      var_t_bounds X (tbnd::tbnds) (var_meet_op v1 v2)
 
 with var_ts : tname -> list typ -> list variance -> Prop :=
-| var_ts_nil : forall X, var_ts X nil nil
-| var_ts_cons: forall X t ts v vs,
-                     var_t X t v ->
-                     var_ts X ts vs ->
-                     var_ts X (t::ts) (v::vs).
+| var_ts_nil :
+    forall X,
+ (* --------------------------- *)
+      var_ts X nil nil
+| var_ts_cons:
+    forall X t ts v vs,
+      var_t X t v ->
+      var_ts X ts vs ->
+ (* --------------------------- *)
+      var_ts X (t::ts) (v::vs).
 
 Inductive var_p : tname -> typ_p -> variance -> Prop :=
-| var_p_inf : forall X, var_p X p_inf bivar
-| var_p_typ : forall X t v,
-              var_t X t v -> var_p X (p_typ t) v.
+| var_p_inf :
+    forall X,
+ (* --------------------------- *)
+      var_p X p_inf bivar
+
+| var_p_typ :
+    forall X t v,
+ (* --------------------------- *)
+      var_t X t v -> var_p X (p_typ t) v.
 
 Hint Constructors var_t
                   var_n
@@ -281,59 +321,90 @@ Definition mono_n (vs:list variance) (xs: list tname)
 Hint Unfold mono_n.
 
 Inductive mono_t_bound : list variance -> list tname -> t_bound -> Prop :=
-| mono_t_bound_nil : forall tbnd, mono_t_bound nil nil tbnd
+| mono_t_bound_nil :
+    forall tbnd,
+ (* --------------------------- *)
+      mono_t_bound nil nil tbnd
+
 | mono_t_bound_cons :
     forall v vs x xs tbnd w,
       var_t_bound x tbnd w ->
       var_leq v w ->
       mono_t_bound vs xs tbnd ->
+ (* --------------------------- *)
       mono_t_bound (v::vs) (x::xs) tbnd.
 
 Hint Constructors mono_t_bound.
 
-Inductive mono_t_bounds (vs: list variance) (xs:list tname): list t_bound -> Prop :=
-| mono_t_bounds_nil : mono_t_bounds vs xs nil
-| mono_t_bounds_cons :
-    forall tbnd tbnds,
-      mono_t_bound vs xs tbnd ->
-      mono_t_bounds vs xs tbnds ->
-      mono_t_bounds vs xs (tbnd::tbnds).
+Inductive mono_t_bound_wide : list variance -> list tname -> list t_bound -> Prop :=
+| mono_t_bound_wide_nil :
+    forall xs vs,
+ (* ------------------------------- *)
+      mono_t_bound_wide vs xs nil
 
-Hint Constructors mono_t_bounds.
+| mono_t_bound_wide_cons :
+    forall tbnd tbnds vs xs,
+      mono_t_bound vs xs tbnd ->
+      mono_t_bound_wide vs xs tbnds ->
+ (* ---------------------------------------- *)
+      mono_t_bound_wide vs xs (tbnd::tbnds).
+
+Hint Constructors mono_t_bound_wide.
+
+Inductive mono_t_wide : list variance -> list tname -> list typ -> Prop :=
+| mono_t_wide_nil :
+    forall vs xs,
+ (* ------------------------- *)
+      mono_t_wide vs xs nil
+      
+| mono_t_wide_cons :
+    forall t ts vs xs,
+      mono_t vs xs t ->
+      mono_t_wide vs xs ts ->
+ (* --------------------------- *)
+      mono_t_wide vs xs (t::ts).
 
 Inductive wide_var_b : list tname -> list typ_b -> list variance -> Prop :=
 | wide_var_b_nil : wide_var_b nil nil nil
-| wide_var_b_cons : forall x xs b bs v vs,
-                var_b x b v ->
-                wide_var_b xs bs vs ->
-                wide_var_b (x::xs) (b::bs) (v::vs).
+| wide_var_b_cons :
+    forall x xs b bs v vs,
+      var_b x b v ->
+      wide_var_b xs bs vs ->
+ (* --------------------------------------- *)
+      wide_var_b (x::xs) (b::bs) (v::vs).
 
 Hint Constructors wide_var_b.
 
 Inductive wide_var_t : list tname -> list typ -> list variance -> Prop :=
 | wide_var_t_nil : wide_var_t nil nil nil
-| wide_var_t_cons : forall x xs t ts v vs,
-                var_t x t v ->
-                wide_var_t xs ts vs ->
-                wide_var_t (x::xs) (t::ts) (v::vs).
+| wide_var_t_cons :
+    forall x xs t ts v vs,
+      var_t x t v ->
+      wide_var_t xs ts vs ->
+ (* --------------------------------------- *)
+      wide_var_t (x::xs) (t::ts) (v::vs).
 
 Hint Constructors wide_var_t.
 
 Inductive wide_var_n : list tname -> list typ_n -> list variance -> Prop :=
 | wide_var_n_nil : wide_var_n nil nil nil
-| wide_var_n_cons : forall x xs n ns v vs,
-                var_n x n v ->
-                wide_var_n xs ns vs ->
-                wide_var_n (x::xs) (n::ns) (v::vs).
+| wide_var_n_cons :
+    forall x xs n ns v vs,
+      var_n x n v ->
+      wide_var_n xs ns vs ->
+ (* --------------------------------------- *)
+      wide_var_n (x::xs) (n::ns) (v::vs).
 
 Hint Constructors wide_var_n.
 
 Inductive wide_var_p : list tname -> list typ_p -> list variance -> Prop :=
 | wide_var_p_nil : wide_var_p nil nil nil
-| wide_var_p_cons : forall x xs p ps v vs,
-                var_p x p v ->
-                wide_var_p xs ps vs ->
-                wide_var_p (x::xs) (p::ps) (v::vs).
+| wide_var_p_cons :
+    forall x xs p ps v vs,
+      var_p x p v ->
+      wide_var_p xs ps vs ->
+ (* --------------------------------------- *)
+      wide_var_p (x::xs) (p::ps) (v::vs).
 
 Hint Constructors wide_var_p.
 
