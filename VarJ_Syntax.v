@@ -141,7 +141,7 @@ with value_wide : list exp -> Prop :=
 (* Adding constructors for value to the core hint
  * database.
  *)
-Hint Constructors value.
+Hint Constructors value value_wide.
 
 (* Print HintDb core. *)
 
@@ -318,7 +318,8 @@ Proof.
     apply H.
 
     (* Case e' \in es *)
-    exact (IHvalue_wide e0 H1).
+    apply IHvalue_wide.
+    apply H1.
 Qed.
 
 Hint Resolve value_wide_to_forall.
@@ -349,8 +350,6 @@ Proof.
   apply eInES.
 Qed.
 
-Hint Resolve value_wide_from_forall.
-
 Lemma value_wide_iff_forall :
   forall (es : list exp),
     value_wide es <-> (forall e, In e es -> value e).
@@ -366,7 +365,7 @@ Lemma value_wide_iff_forall :
   forall (es : list exp),
     value_wide es <-> (forall e, In e es -> value e).
 Proof.
-  split; eauto.
+  split; eauto using value_wide_from_forall.
 Qed.
 
 
