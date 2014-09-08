@@ -295,11 +295,9 @@ Fixpoint flatten (A: Type) (ll: list (list A)): list A :=
   end.
 
 
-(** Going from wide judgment to function *)
+(** Going from wide judgment to forall *)
 
-Print value_wide.
-
-Lemma value_wide_to_func
+Lemma value_wide_to_forall
   (* If *)
   (es : list exp)
   (H : value_wide es)
@@ -321,6 +319,54 @@ Proof.
 
     (* Case e' \in es *)
     exact (IHvalue_wide e0 H1).
+Qed.
+
+Hint Resolve value_wide_to_forall.
+
+Lemma value_wide_from_forall
+  (* If *)
+  (es : list exp)
+  (H : forall e, In e es -> value e)
+  :
+  (* Then *)
+  value_wide es.
+Proof.
+  induction es.
+  apply value_wide_nil.
+
+  apply value_wide_cons.
+
+  apply H.
+  apply in_eq.
+
+  apply IHes.
+
+  intros e eInES.
+
+  apply H.
+
+  apply in_cons.
+  apply eInES.
+Qed.
+
+Hint Resolve value_wide_from_forall.
+
+Lemma value_wide_iff_forall :
+  forall (es : list exp),
+    value_wide es <-> (forall e, In e es -> value e).
+Proof.
+  split.
+  apply value_wide_to_forall.
+  apply value_wide_from_forall.
+Qed.
+
+Reset value_wide_iff_forall.
+
+Lemma value_wide_iff_forall :
+  forall (es : list exp),
+    value_wide es <-> (forall e, In e es -> value e).
+Proof.
+  split; eauto.
 Qed.
 
 
