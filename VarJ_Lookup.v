@@ -1,5 +1,5 @@
 Require Import VarJ_Syntax.
-Require Import VarJ_Substitution.
+Require Import VarJ_OpenClose.
 
 (**  Field lookup *)
 

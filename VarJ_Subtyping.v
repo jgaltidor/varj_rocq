@@ -1,7 +1,7 @@
 (* Contains Subtyping and Variance Predicate Definitions *)
 
 Require Import VarJ_Syntax.
-Require Import VarJ_Substitution.
+Require Import VarJ_OpenClose.
 Require Import VarJ_Variance.
 
 (** Subtyping Relations *)

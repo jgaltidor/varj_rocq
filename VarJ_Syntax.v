@@ -45,12 +45,10 @@ Inductive typ : Set :=
    * The first index of type variables indicate their level.
    * The second index of type variables refers to the ith
    * type argument in the list of type arguments
-   * Class type variables are always at level 0
-   * Method type variables are always at level 1.
    * For example: (t_bvar 0 0) refers to the first type parameter
-   * of the enclosing class.
+   * of the innermost enclosing binding.
    * (t_bvar 1 0) refers to the first type parameter of the
-   * enclosing method.
+   * second innermost binding.
    *)
 | t_bvar : nat -> nat -> typ
 | t_fvar : tname -> typ  (* Free type variable *)
@@ -125,13 +123,25 @@ Inductive exp : Set :=
 
 (* Values *)
 Inductive value : exp -> Prop :=
-| value_new : forall N es,
-    (forall e, In e es -> value e) -> value (e_new N es).
+| value_new :
+    forall N es,
+      value_wide es ->
+ (* ---------------------- *)
+      value (e_new N es)
+
+with value_wide : list exp -> Prop :=
+| value_wide_nil : value_wide nil
+| value_wide_cons :
+    forall e es,
+      value e ->
+      value_wide es ->
+ (* ---------------------- *)
+      value_wide (e::es).
 
 (* Adding constructors for value to the core hint
  * database.
  *)
-Hint Constructors value.
+Hint Constructors value value_wide.
 
 (* Print HintDb core. *)
 
@@ -275,4 +285,87 @@ Definition fv_r (r:typ_r) : list tname :=
     | typ_r_n N => fv_n N
     | typ_r_fvar X => X::nil
   end.
+
+(** Auxiliaries *)
+
+Fixpoint flatten (A: Type) (ll: list (list A)): list A :=
+  match ll with
+  | nil => nil
+  | hd :: tl => hd ++ (flatten tl)
+  end.
+
+
+(** Going from wide judgment to forall *)
+
+Lemma value_wide_to_forall
+  (* If *)
+  (es : list exp)
+  (H : value_wide es)
+  :
+  (* Then *)
+  (forall e, In e es -> value e).
+Proof.
+  induction H.
+  intros e eInNil.
+  simpl in eInNil.
+  contradiction.
+
+  intros e0 e0InEs.
+  destruct e0InEs.
+
+    (* Case: e = e' *)
+    rewrite <- H1.
+    apply H.
+
+    (* Case e' \in es *)
+    apply IHvalue_wide.
+    apply H1.
+Qed.
+
+Hint Resolve value_wide_to_forall.
+
+Lemma value_wide_from_forall
+  (* If *)
+  (es : list exp)
+  (H : forall e, In e es -> value e)
+  :
+  (* Then *)
+  value_wide es.
+Proof.
+  induction es.
+  apply value_wide_nil.
+
+  apply value_wide_cons.
+
+  apply H.
+  apply in_eq.
+
+  apply IHes.
+
+  intros e eInES.
+
+  apply H.
+
+  apply in_cons.
+  apply eInES.
+Qed.
+
+Lemma value_wide_iff_forall :
+  forall (es : list exp),
+    value_wide es <-> (forall e, In e es -> value e).
+Proof.
+  split.
+  apply value_wide_to_forall.
+  apply value_wide_from_forall.
+Qed.
+
+Reset value_wide_iff_forall.
+
+Lemma value_wide_iff_forall :
+  forall (es : list exp),
+    value_wide es <-> (forall e, In e es -> value e).
+Proof.
+  split; eauto using value_wide_from_forall.
+Qed.
+
 

@@ -1,0 +1,9 @@
+Defining lc_t requires not using the list type
+to define existential types.
+
+It is better to define wide judgments or judgments
+over list so that inference rules do not depend on
+using the "In" predicate.
+
+Use the "In" predicate only when there is an element
+that may not be in the list.

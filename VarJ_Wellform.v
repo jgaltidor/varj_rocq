@@ -1,7 +1,7 @@
 (* Judgments for wellformed types and environments in VarJ *)
 
 Require Import VarJ_Syntax.
-Require Import VarJ_Substitution.
+Require Import VarJ_OpenClose.
 Require Import VarJ_Subtyping.
 
 (* ubound in VarJ paper needs to be fix *)

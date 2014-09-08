@@ -1,6 +1,7 @@
 (* Couple Test Lemmas *)
 
 Require Import VarJ_Syntax.
+Require Import VarJ_OpenClose.
 Require Import VarJ_Substitution.
 Require Import VarJ_Subtyping.
 Require Import VarJ_Lookup.
