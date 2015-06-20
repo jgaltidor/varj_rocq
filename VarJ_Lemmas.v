@@ -23,6 +23,19 @@ Proof.
   admit.
 Qed.
 
+Lemma weakening_subtyping_special_case :
+  forall tcxt tcxt' T T',
+  ok_cxt_t  tcxt tcxt' ->
+  subtype_t tcxt T T' ->
+  subtype_t (tcxt ++ tcxt') T T'.
+Proof.
+  intros tcxt tcxt' T T' H1 H2.
+  assert ((tcxt ++ tcxt') = (tcxt ++ tcxt' ++ nil)) as Heq_1.
+  simpl_list.
+  reflexivity.
+  rewrite -> Heq_1.
+  apply weakening_subtyping ; ssimpl_list; assumption.
+Qed.
 
 Lemma context_movement :
   forall tcxt tcxt' tcxt'',
@@ -45,25 +58,21 @@ Lemma inversion_field :
      subtype_t (tcxt ++ tcxt' ++ tcxt_n) U T).
 Proof.
   intros tcxt ecxt e f T tcxt' H1 H2.
+
   remember (e_field e f) as He.
-  induction H1.
-
-  (* Impossible case: typing_var *)
-    inversion HeqHe.
-
-  (* Impossible case: typing_new *)
-    inversion HeqHe.
+  induction H1 ; try discriminate.
 
   (* Case: typing_field *)
     exists nil, tbnds, N, T.
 
-    (* First simplify hypotheses *)    
+    (* First simplify hypotheses *)
+    
     inversion HeqHe.
-    rewrite -> H4 in *.
-    rewrite -> H5 in *.
-    unfold N_open in H0.
+    subst e0.
+    subst f0.
+    unfold N_open in *.
     simpl in *.
-
+    
     (* Simpify conclusion *)
     ssimpl_list.
     (* Remaining steps are simple. *)
@@ -86,21 +95,31 @@ Proof.
 
     exists (tcxt' ++ tcxt_n'), tbnds', N, U'.
 
-    split.
-    apply Hu'.
-
-    split.
-    apply Hu'.
-
-    split.
-    apply Hu'.
-
-    split.
-    apply Hu'.
+    repeat (split; try apply Hu').
 
     apply subtype_t_trans with (t2 := U).
     apply Hu'.
 
+    assert ((tcxt ++ tcxt' ++ tcxt_n') = ((tcxt ++ tcxt') ++ tcxt_n')) as Heq_1.
+    SearchRewrite (( _ ++ _ ) ++ _).
+    apply app_assoc.
+    rewrite -> Heq_1.
+    
+    simpl.
+    autorewrite with list using simpl.
+    ssimpl_list.
+    reflexivity.
+    
+    apply weakening_subtyping_special_case.
+    apply Hu'.
+    
+
+      apply weakening_subtyping with
+        (tcxt:=tcxt++tcxt') (tcxt':=nil) (tcxt'':=tcxt_n')
+        (T:=U) (T':=T).
+
+  (***)
+    
     assert
       (subtype_t ((tcxt ++ tcxt') ++ tcxt_n' ++ nil) U T)
       as Hweak.
