@@ -18,7 +18,7 @@ The code targets **Rocq 9.2**. It was ported from Coq 8.4, and the last Coq 8.4 
 - Check a single file and its dependencies: `make VarJ_Typing.vo`
 - Clean: `make clean`
 
-There are no tests. "Passing" means every `.v` file compiles. The unfinished proofs `weakening_subtyping` and `context_movement` in `VarJ_Lemmas.v` end in `Admitted`. Use `Print Assumptions <lemma>.` to see what a result depends on. The remaining build warnings (`register-all`, `notation-incompatible-prefix`, `closed-notation-not-level-0`) are expected and harmless.
+There are no tests. "Passing" means every `.v` file compiles, which CI (`.github/workflows/build.yml`) checks on every push to `master` and on every pull request, using the same image. The unfinished proofs `weakening_subtyping` and `context_movement` in `VarJ_Lemmas.v` end in `Admitted`. Use `Print Assumptions <lemma>.` to see what a result depends on. The remaining build warnings (`register-all`, `notation-incompatible-prefix`, `closed-notation-not-level-0`) are expected and harmless.
 
 ### Rocq conventions used here
 

@@ -1,5 +1,7 @@
 # varj_rocq
 
+[![Build](https://github.com/jgaltidor/varj_rocq/actions/workflows/build.yml/badge.svg)](https://github.com/jgaltidor/varj_rocq/actions/workflows/build.yml)
+
 A mechanization of **VarJ** in the [Rocq Prover](https://rocq-prover.org/) (formerly Coq).
 
 VarJ is a core calculus for Java-like generics that combines **definition-site variance** (variance annotations on class type parameters, as in Scala or C#) with **use-site variance** (Java wildcards, modeled as existential types). It was introduced in:

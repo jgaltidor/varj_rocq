@@ -1,0 +1,21 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # The image runs as user rocq (uid 1000), which must be able to write
+      # build outputs into the checkout.
+      - name: Give the container user ownership of the checkout
+        run: sudo chown -R 1000:1000 .
+
+      - name: Build with Rocq 9.2
+        run: docker run --rm -v "$PWD":/w -w /w rocq/rocq-prover:9.2 make
