@@ -1,4 +1,6 @@
 -Q . VarJ
+# Rocq 9.2 warns that it cannot derive nested induction schemes for list/prod; they are not used.
+-arg -w -arg -register-all
 
 VarJ_Env.v
 VarJ_Syntax.v

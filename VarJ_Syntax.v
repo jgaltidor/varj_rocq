@@ -84,17 +84,12 @@ Definition t_bounds_get_lower_bounds (tbnds: t_bounds) :=
 Definition t_bounds_get_upper_bounds (tbnds: t_bounds) :=
   List.map t_bound_get_upper_bound tbnds.
 
+(* Written +, -, o, and * in the VarJ paper. *)
 Inductive variance : Set :=
-| covar : variance
-| contravar : variance
-| invar : variance
-| bivar : variance.
-
-Declare Scope variance_scope.
-
-Notation "+" := covar     (at level 30) : variance_scope.
-Notation "-" := contravar (at level 30) : variance_scope.
-Notation "*" := bivar     (at level 30) : variance_scope.
+| covar : variance      (* + *)
+| contravar : variance  (* - *)
+| invar : variance      (* o *)
+| bivar : variance.     (* * *)
 
 (** Represents list of declared variances, lower and upper bounds
   * of class type parameboundsters
