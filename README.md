@@ -27,6 +27,7 @@ With Rocq installed locally:
 ```sh
 make                 # build everything
 make VarJ_Typing.vo  # build one file and its dependencies
+make check           # build, then fail if any lemma depends on an unexpected assumption
 make clean
 ```
 
