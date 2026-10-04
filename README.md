@@ -6,7 +6,7 @@ A mechanization of **VarJ** in the [Rocq Prover](https://rocq-prover.org/) (form
 
 VarJ is a core calculus for Java-like generics that combines **definition-site variance** (variance annotations on class type parameters, as in Scala or C#) with **use-site variance** (Java wildcards, modeled as existential types). It was introduced in:
 
-> John Altidor, Shan Shan Huang, and Yannis Smaragdakis. *Taming the Wildcards: Combining Definition- and Use-Site Variance.* PLDI 2011.
+> John Altidor, Christoph Reichenbach, and Yannis Smaragdakis. *Java Wildcards Meet Definition-Site Variance.* ECOOP 2012.
 
 VarJ builds on TameFJ (Cameron, Drossopoulou, and Ernst, *A Model for Java with Wildcards*, ECOOP 2008). Binders are encoded with the **locally nameless** representation (Aydemir et al., *Engineering Formal Metatheory*, POPL 2008).
 
