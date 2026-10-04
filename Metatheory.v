@@ -13,7 +13,6 @@
     properties) for the study of programming languages in Coq. The definition
     of these constructs is mostly straightforward. *)
 
-From VarJ Require Import AdditionalTactics.
 From VarJ Require Export Atom.
 From Stdlib Require Export List.
 
@@ -120,8 +119,8 @@ Section Environment.
     Proof.
       unfold binds.
       induction F as [|(y,b)]; simpl; intros H.
-      Case "nil". discriminate.
-      Case "cons". destruct (x == y); auto.
+      (* Case nil *) discriminate.
+      (* Case cons *) destruct (x == y); auto.
     Qed.
 
     Fact binds_nobinds : forall x a E,
@@ -155,11 +154,11 @@ Section Environment.
     Proof.
       unfold no_binds. intros.
       induction E1 as [|(y,v)]; simpl.
-      Case "nil". assumption.
-      Case "cons". destruct (x==y).
-        SCase "x=y".
+      (* Case nil *) assumption.
+      (* Case cons *) destruct (x==y).
+        (* SCase x=y *)
           subst. rewrite binds_first in H. discriminate H.
-        SCase "x<>y".
+        (* SCase x<>y *)
           simpl in H. rewrite eq_atom_false with (1:=n) in H.
           auto.
     Qed.
@@ -177,8 +176,8 @@ Section Environment.
     Proof.
       intros.
       induction E as [| (u, v) E]; simpl in H.
-      Case "nil". contradiction.
-      Case "cons".
+      (* Case nil *) contradiction.
+      (* Case cons *)
         unfold binds in *. simpl in *.
         destruct (x == u); [ eauto | apply IHE ].
         destruct H; [ symmetry in H; contradiction | apply H ].
@@ -189,8 +188,8 @@ Section Environment.
     Proof.
       intros.
       induction E as [| (u, v) E].
-      Case "nil". contradiction (binds_nil H).
-      Case "cons".
+      (* Case nil *) contradiction (binds_nil H).
+      (* Case cons *)
         unfold binds in *. simpl in *.
         destruct (x == u); auto.
     Qed.
@@ -200,8 +199,8 @@ Section Environment.
     Proof.
       intros.
       induction E as [| (u, v) E].
-      Case "nil". reflexivity.
-      Case "cons".
+      (* Case nil *) reflexivity.
+      (* Case cons *)
         simpl in *.
         destruct (x == u); [ contradiction H | apply IHE ]; auto.
     Qed.
@@ -225,15 +224,15 @@ Section Environment.
       binds x a E -> ok (F ++ E) -> binds x a (F ++ E).
     Proof.
       induction F as [|(y,b)]; simpl; intros H Ok.
-      Case "nil". assumption.
-      Case "cons".
+      (* Case nil *) assumption.
+      (* Case cons *)
         inversion Ok. subst.
         destruct (y == x).
-        SCase "x=y".
+        (* SCase x=y *)
           subst.
           contradiction binds_nobinds with (a:=a) (2:=H4).
           eauto.
-        SCase "x<>y".
+        (* SCase x<>y *)
           apply binds_other; [ auto | assumption ].
     Qed.
 
@@ -243,15 +242,15 @@ Section Environment.
       binds x a (G ++ F ++ E).
     Proof.
       induction G as [|(y,b)]; simpl; intros H Ok.
-      Case "nil". apply binds_concat_ok; assumption.
-      Case "cons".
+      (* Case nil *) apply binds_concat_ok; assumption.
+      (* Case cons *)
         inversion Ok. subst.
         destruct (y == x).
-        SCase "x=y".
+        (* SCase x=y *)
           subst.
           rewrite binds_elim_eq with (1:=H).
           apply binds_first.
-        SCase "x<>y".
+        (* SCase x<>y *)
           apply binds_other with (2:=n).
           apply IHG; [ eauto using binds_elim_neq | assumption ].
     Qed.
@@ -282,21 +281,21 @@ Section Environment.
         forall_env (E++F++G) -> forall_env (E++G).
     Proof.
       intros; induction E as [| (y,a)]; simpl.
-      Case "nil".
+      (* Case nil *)
         induction F as [| (y,a)].
-        SCase "nil". trivial.
-        SCase "cons". apply IHF. inversion H. subst. assumption.
-      Case "cons". inversion H. subst. auto.
+        (* SCase nil *) trivial.
+        (* SCase cons *) apply IHF. inversion H. subst. assumption.
+      (* Case cons *) inversion H. subst. auto.
     Qed.
 
     Fact fa_binds_elim: forall x a E,
         binds x a E -> forall_env E -> P x a.
     Proof.
       intros; induction H0.
-      Case "fa_nil". contradiction (binds_nil H).
-      Case "fa_cons". destruct (x == x0).
-        SCase "x = x0". subst. rewrite (binds_elim_eq H). assumption.
-        SCase "x <> x0". eauto using binds_elim_neq.
+      (* Case fa_nil *) contradiction (binds_nil H).
+      (* Case fa_cons *) destruct (x == x0).
+        (* SCase x = x0 *) subst. rewrite (binds_elim_eq H). assumption.
+        (* SCase x <> x0 *) eauto using binds_elim_neq.
     Qed.
 
 End Environment.

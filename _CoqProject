@@ -1,6 +1,5 @@
 -Q . VarJ
 
-AdditionalTactics.v
 Atom.v
 Metatheory.v
 VarJ_Syntax.v

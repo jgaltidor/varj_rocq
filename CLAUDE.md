@@ -30,7 +30,7 @@ There are no tests. "Passing" means every `.v` file compiles. The unfinished pro
 
 All modules are flat in the repo root. The dependency chain, bottom to top:
 
-1. **Infrastructure (borrowed, not VarJ-specific)**: `Atom.v` (atoms are `nat`, plus freshness), `AdditionalTactics.v` (POPLmark `Case`/`SCase` tactics), and `Metatheory.v` (association-list environments: `binds`, `dom`, `ok`, and the `\in`/`\notin`/`==` notations, from De Fraine's Cast-Free FJ development).
+1. **Infrastructure (borrowed, not VarJ-specific)**: `Atom.v` (atoms are `nat`, plus freshness) and `Metatheory.v` (association-list environments: `binds`, `dom`, `ok`, and the `\in`/`\notin`/`==` notations, from De Fraine's Cast-Free FJ development).
 2. **`VarJ_Syntax.v`**: all syntax. It re-exports `Metatheory`, `List`, and `Arith`, so every other VarJ module just `Require Import VarJ_Syntax`. Key points:
    - Types are a mutual inductive: `typ` (existential `t_ext`, bound var `t_bvar level index`, free var `t_fvar`), `typ_n` (class type `n_typ C ts`), and `typ_b` (lower bound or `b_bot`). Bound variables are **two-indexed**: binder depth, then position within that binder's parameter list, because binders introduce lists of variables.
    - `typ_p` adds `p_inf` (inferred type argument). `typ_r` is an "opened" type body.
