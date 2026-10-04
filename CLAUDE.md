@@ -16,9 +16,10 @@ The code targets **Rocq 9.2**. It was ported from Coq 8.4, and the last Coq 8.4 
 
 - Build everything: `make`
 - Check a single file and its dependencies: `make VarJ_Typing.vo`
+- Build, then check which assumptions lemmas rely on: `make check`
 - Clean: `make clean`
 
-There are no tests. "Passing" means every `.v` file compiles, which CI (`.github/workflows/build.yml`) checks on every push to `master` and on every pull request, using the same image. The unfinished proofs `weakening_subtyping` and `context_movement` in `VarJ_Lemmas.v` end in `Admitted`. Use `Print Assumptions <lemma>.` to see what a result depends on. The remaining build warnings (`register-all`, `notation-incompatible-prefix`, `closed-notation-not-level-0`) are expected and harmless.
+There are no tests. "Passing" means every `.v` file compiles and `make check` succeeds. `make check` (`scripts/check_assumptions.sh`) runs `Print Assumptions` on every lemma, and fails if any depends on something outside its `ALLOWED` list: the global parameters (`this`, `Object`, `CT`, `classTableOK`) and the two lemmas still `Admitted` in `VarJ_Lemmas.v` (`weakening_subtyping`, `context_movement`). When you prove one of those, remove it from `ALLOWED`. CI (`.github/workflows/build.yml`) runs `make check` on pushes to `main`, on pull requests, and weekly, against Rocq 9.2 (required) and `latest` (allowed to fail). The build should produce no warnings. `register-all` is turned off in `_CoqProject`, and any other warning is new.
 
 ### Rocq conventions used here
 
@@ -37,7 +38,7 @@ All modules are flat in the repo root. The dependency chain, bottom to top:
    - Class tables, method/field defs, and contexts (`cxt_t` for type variables with bounds, `cxt_e` for expression variables) are `Abbreviation`s over tuples and lists, not inductives.
    - Global assumptions (`Parameter`): `this`, `Object`, the class table `CT`, and, in `VarJ_Typing.v`, `classTableOK : CT_isOK CT`.
 3. **Binder operations**: `VarJ_OpenClose.v` (`open_*` for each syntactic category, `*_with_names`, `fresh_list`, local closure `lc_t`, `bodies_*`) and `VarJ_Substitution.v` (`subst_*`, simultaneous substitution of name lists).
-4. **`VarJ_Variance.v`**: the variance lattice (`covar`, `contravar`, `invar`, `bivar` with `+`/`-`/`*` notations in `variance_scope`), the transform/meet/join operators as both `*_op` functions and relational `Prop` wrappers, and the variance-of-a-type judgment `var_t`/`var_p`.
+4. **`VarJ_Variance.v`**: the variance lattice (`covar`, `contravar`, `invar`, `bivar`, written `+`, `-`, `o`, and `*` in the paper), the transform/meet/join operators as both `*_op` functions and relational `Prop` wrappers, and the variance-of-a-type judgment `var_t`/`var_p`.
 5. **Judgments**: `VarJ_Lookup.v` (`fields`, `ftype`, `mtype`, `mbody`), `VarJ_Subtyping.v` (`subtype_n`/`subtype_t`/`subtype_b`), `VarJ_Wellform.v` (`ok_t`, `ubound_t`, `ok_cxt_e`), `VarJ_Typing.v` (expression `typing`, which also outputs a context of opened existential variables, plus `method_typing`, `class_typing`, and `CT_isOK`), and `VarJ_Reduction.v` (`step`).
 6. **`VarJ_Lemmas.v`**: metatheory lemmas (weakening, inversion). This file is the least complete.
 
@@ -49,5 +50,5 @@ All modules are flat in the repo root. The dependency chain, bottom to top:
 
 ## History
 
-- `master` is the only branch. The early history was imported from SVN. An abandoned experiment with length-indexed vectors instead of lists was deleted: a single judgment form over lists of different lengths fits the encoding better.
+- `main` is the only branch. The early history was imported from SVN. An abandoned experiment with length-indexed vectors instead of lists was deleted: a single judgment form over lists of different lengths fits the encoding better.
 - Commit `dd6e750` is the last one with `archive/`, which held design notes and pre-repo snapshots of the encoding.

@@ -2,13 +2,27 @@ name: Build
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
   workflow_dispatch:
+  schedule:
+    # Weekly, so a new Rocq release that breaks the build shows up without a push.
+    - cron: "0 6 * * 1"
 
 jobs:
   build:
+    name: Rocq ${{ matrix.rocq }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rocq: "9.2"
+            experimental: false
+          - rocq: latest
+            experimental: true
+    # A failure on the newest release is a warning, not a broken build.
+    continue-on-error: ${{ matrix.experimental }}
     steps:
       - uses: actions/checkout@v5
 
@@ -17,5 +31,5 @@ jobs:
       - name: Let the container user write to the checkout
         run: chmod -R a+w .
 
-      - name: Build with Rocq 9.2
-        run: docker run --rm -v "$PWD":/w -w /w rocq/rocq-prover:9.2 make
+      - name: Build and check assumptions
+        run: docker run --rm -v "$PWD":/w -w /w rocq/rocq-prover:${{ matrix.rocq }} make check
