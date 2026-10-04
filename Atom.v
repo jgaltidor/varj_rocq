@@ -5,10 +5,10 @@
     Original authors: Arthur Chargueraud and Brian Aydemir.
 *)
 
-Require Import List.
-Require Import Max.
-Require Import Le.
-Require Peano_dec.
+From Stdlib Require Import List.
+From Stdlib Require Import Arith.
+From Stdlib Require Import Lia.
+From Stdlib Require Peano_dec.
 
 (* ********************************************************************** *)
 (** * Definition *)
@@ -43,7 +43,7 @@ Module AtomImpl : ATOM.
   Lemma max_lt_r : forall x y z,
     x <= z -> x <= max y z.
   Proof.
-    intros. apply le_trans with (1:=H). apply le_max_r.
+    intros. lia.
   Qed.
 
   Lemma nat_list_max : forall (xs : list nat),
@@ -54,7 +54,7 @@ Module AtomImpl : ATOM.
     exists 0. inversion 1.
     (* case: cons x xs *)
     exists (max x y). intros z J. simpl in J. destruct J as [K | K].
-      subst. apply le_max_l.
+      subst. apply Nat.le_max_l.
       apply max_lt_r. auto.
   Qed.
 
@@ -63,8 +63,7 @@ Module AtomImpl : ATOM.
   Proof.
     intros xs. destruct (nat_list_max xs) as [x H].
     exists (S x). intros J. specialize (H (S x) J).
-    apply n_Sn with (n:=x).
-    apply le_antisym. apply le_n_Sn. assumption.
+    lia.
   Qed.
 
   Definition eq_atom_dec := Peano_dec.eq_nat_dec.

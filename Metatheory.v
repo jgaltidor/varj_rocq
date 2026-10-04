@@ -13,9 +13,9 @@
     properties) for the study of programming languages in Coq. The definition
     of these constructs is mostly straightforward. *)
 
-Require Import AdditionalTactics.
-Require Export Atom.
-Require Export List.
+From VarJ Require Import AdditionalTactics.
+From VarJ Require Export Atom.
+From Stdlib Require Export List.
 
 Set Implicit Arguments.
 
@@ -265,7 +265,7 @@ Section Environment.
     | fa_nil: forall_env nil
     | fa_cons: forall E x v, forall_env E -> P x v -> forall_env ((x,v)::E).
 
-    Hint Constructors forall_env.
+    Hint Constructors forall_env : core.
 
     Fact fa_single: forall x a, P x a -> forall_env ((x,a)::nil).
     Proof.
@@ -302,9 +302,9 @@ Section Environment.
 End Environment.
 
 Unset Implicit Arguments.
-Hint Constructors ok.
-Hint Constructors forall_env.
-Implicit Arguments fa_nil [A].
+#[global] Hint Constructors ok : core.
+#[global] Hint Constructors forall_env : core.
+Arguments fa_nil {A}.
 
 Set Implicit Arguments.
 
@@ -317,7 +317,7 @@ Inductive env_zip (A: Type) (B: Type) : list (atom * A) -> list B -> list (atom 
     env_zip aenv bs benv ->
     env_zip ((x,a)::aenv) (b::bs) ((x,b)::benv).
 
-Hint Constructors env_zip.
+#[global] Hint Constructors env_zip : core.
 
 Unset Implicit Arguments.
 

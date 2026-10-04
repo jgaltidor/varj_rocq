@@ -9,3 +9,6 @@
 .nia.cache
 Makefile.conf
 .DS_Store
+Makefile.rocq
+Makefile.rocq.conf
+.Makefile.rocq.d

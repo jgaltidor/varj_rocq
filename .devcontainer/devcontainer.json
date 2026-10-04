@@ -1,0 +1,12 @@
+{
+  "name": "varj_coq (Rocq 9.2)",
+  "image": "rocq/rocq-prover:9.2",
+  // The official Rocq images are amd64-only; on Apple Silicon they run under emulation.
+  "runArgs": ["--platform=linux/amd64"],
+  "remoteUser": "rocq",
+  "customizations": {
+    "vscode": {
+      "extensions": ["rocq-prover.vsrocq"]
+    }
+  }
+}

@@ -1,4 +1,4 @@
-Require Import VarJ_Syntax.
+From VarJ Require Import VarJ_Syntax.
 
 Open Scope nat_scope.
 
@@ -18,7 +18,7 @@ Fixpoint open_t (k:nat) (t:typ) (ts:list typ) {struct t} : typ :=
     | t_ext bounds N =>
         t_ext (open_t_bounds (S k) bounds ts) (open_n (S k) N ts)
     | t_bvar n1 n2 =>
-        match (nat_compare n1 k) with
+        match (Nat.compare n1 k) with
           | Eq => List.nth n2 ts t
           | _  => t
           end
@@ -153,7 +153,7 @@ Inductive distinct (A:Type) : list A -> nat -> list A -> Prop :=
                   distinct (x::L) n xs ->
                   distinct L (S n) (x::xs).
 
-Hint Constructors distinct.
+#[global] Hint Constructors distinct : core.
 
 
 Fixpoint fresh_list (L: list atom) (n: nat) : list atom :=
@@ -257,7 +257,7 @@ Definition bodies_bnd (n:nat) (bnd: t_bound) : Prop :=
 Definition tbounds_matches_cxt (tbnds : t_bounds) (tcxt : cxt_t) : Prop :=
   (openToCtxt_tbounds 0 (dom tcxt) tbnds) = tcxt.
 
-Hint Unfold tbounds_matches_cxt.
+#[global] Hint Unfold tbounds_matches_cxt : core.
 
 Inductive boundsOfTyp_matches_cxt : typ -> cxt_t -> Prop :=
 | boundsOfTyp_matches_cxt_ext :
@@ -268,7 +268,7 @@ Inductive boundsOfTyp_matches_cxt : typ -> cxt_t -> Prop :=
 | boundsOfTyp_matches_cxt_fvar :
     forall X, boundsOfTyp_matches_cxt (t_fvar X) nil.
 
-Hint Constructors boundsOfTyp_matches_cxt.
+#[global] Hint Constructors boundsOfTyp_matches_cxt : core.
 
 Inductive wide_boundsOfTyp_matches_cxt : list typ -> list cxt_t -> Prop :=
 | wide_boundsOfTyp_matches_cxt_nil : wide_boundsOfTyp_matches_cxt nil nil
@@ -278,5 +278,5 @@ Inductive wide_boundsOfTyp_matches_cxt : list typ -> list cxt_t -> Prop :=
       wide_boundsOfTyp_matches_cxt ts tcxts ->
       wide_boundsOfTyp_matches_cxt (t::ts) (tcxt::tcxts).
 
-Hint Constructors wide_boundsOfTyp_matches_cxt.
+#[global] Hint Constructors wide_boundsOfTyp_matches_cxt : core.
 

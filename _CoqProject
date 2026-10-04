@@ -1,0 +1,15 @@
+-Q . VarJ
+
+AdditionalTactics.v
+Atom.v
+Metatheory.v
+VarJ_Syntax.v
+VarJ_OpenClose.v
+VarJ_Substitution.v
+VarJ_Variance.v
+VarJ_Lookup.v
+VarJ_Subtyping.v
+VarJ_Wellform.v
+VarJ_Typing.v
+VarJ_Reduction.v
+VarJ_Lemmas.v

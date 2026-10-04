@@ -1,5 +1,5 @@
-Require Import VarJ_Syntax.
-Require Import VarJ_OpenClose.
+From VarJ Require Import VarJ_Syntax.
+From VarJ Require Import VarJ_OpenClose.
 
 (**  Field lookup *)
 
@@ -10,7 +10,7 @@ Inductive fields : cname -> fielddefs -> Prop :=
     fields D fds' ->
     fields C (fds' ++ fds).
 
-Hint Constructors fields.
+#[global] Hint Constructors fields : core.
 
 (** Need to substitute in type actuals for binders
   * to define ftype
@@ -28,7 +28,7 @@ Inductive ftype : fname -> typ_n -> typ -> Prop :=
     ftype f (open_n 0 N ts) t ->
     ftype f (n_typ C ts) t.
 
-Hint Constructors ftype.
+#[global] Hint Constructors ftype : core.
 
 (** Method lookup *)
 
@@ -39,7 +39,7 @@ Inductive methods : cname -> methdefs -> Prop :=
     methods D mds' ->
     methods C (mds' ++ mds).
 
-Hint Constructors methods.
+#[global] Hint Constructors methods : core.
 
 Inductive mtype : mname -> typ_n -> msig -> Prop :=
 | mtype_class :
@@ -54,7 +54,7 @@ Inductive mtype : mname -> typ_n -> msig -> Prop :=
     mtype m (open_n 0 N ts) sig ->
     mtype m (n_typ C ts) sig.
 
-Hint Constructors mtype.
+#[global] Hint Constructors mtype : core.
 
 Inductive mbody : mname -> typ_n -> exp -> Prop :=
 | mbody_class :
@@ -69,7 +69,7 @@ Inductive mbody : mname -> typ_n -> exp -> Prop :=
     mbody m (open_n 0 N ts) e ->
     mbody m (n_typ C ts) e.
 
-Hint Constructors mbody.
+#[global] Hint Constructors mbody : core.
 
 Inductive wide_ftype : typ_n -> list fname -> list typ -> Prop :=
 | wide_ftype_nil :
@@ -81,7 +81,7 @@ Inductive wide_ftype : typ_n -> list fname -> list typ -> Prop :=
     wide_ftype N fs ts ->
     wide_ftype N (f::fs) (t::ts).
 
-Hint Constructors wide_ftype.
+#[global] Hint Constructors wide_ftype : core.
 
 Inductive wide_mtype : typ_n -> list mname -> list msig -> Prop :=
 | wide_mtype_nil :
@@ -93,5 +93,5 @@ Inductive wide_mtype : typ_n -> list mname -> list msig -> Prop :=
     wide_mtype N ms sigs ->
     wide_mtype N (m::ms) (sig::sigs).
 
-Hint Constructors wide_mtype.
+#[global] Hint Constructors wide_mtype : core.
 

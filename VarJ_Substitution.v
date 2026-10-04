@@ -1,4 +1,4 @@
-Require Import VarJ_Syntax.
+From VarJ Require Import VarJ_Syntax.
 
 Fixpoint subst_t (xs: list tname) (ts: list typ) (t: typ) : typ :=
   let subst_t_bound :=

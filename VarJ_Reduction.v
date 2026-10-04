@@ -1,12 +1,12 @@
 (* Reduction (Evalution) Semantics *)
 
-Require Import VarJ_Syntax.
-Require Import VarJ_OpenClose.
-Require Import VarJ_Substitution.
-Require Import VarJ_Subtyping.
-Require Import VarJ_Lookup.
-Require Import VarJ_Wellform.
-Require Import VarJ_Typing.
+From VarJ Require Import VarJ_Syntax.
+From VarJ Require Import VarJ_OpenClose.
+From VarJ Require Import VarJ_Substitution.
+From VarJ Require Import VarJ_Subtyping.
+From VarJ Require Import VarJ_Lookup.
+From VarJ Require Import VarJ_Wellform.
+From VarJ Require Import VarJ_Typing.
 
 Fixpoint getNTypes_exps (es:list exp) : list typ_n :=
   match es with
@@ -79,5 +79,5 @@ with wide_step : list exp -> list exp -> Prop :=
                      wide_step es es' ->
                      wide_step (e::es) (e::es').
 
-Hint Constructors step wide_step.
+#[global] Hint Constructors step wide_step : core.
 

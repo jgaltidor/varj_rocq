@@ -1,13 +1,13 @@
 (* Couple Test Lemmas *)
 
-Require Import VarJ_Syntax.
-Require Import VarJ_OpenClose.
-Require Import VarJ_Substitution.
-Require Import VarJ_Subtyping.
-Require Import VarJ_Lookup.
-Require Import VarJ_Wellform.
-Require Import VarJ_Typing.
-Require Import VarJ_Reduction.
+From VarJ Require Import VarJ_Syntax.
+From VarJ Require Import VarJ_OpenClose.
+From VarJ Require Import VarJ_Substitution.
+From VarJ Require Import VarJ_Subtyping.
+From VarJ Require Import VarJ_Lookup.
+From VarJ Require Import VarJ_Wellform.
+From VarJ Require Import VarJ_Typing.
+From VarJ Require Import VarJ_Reduction.
 
 (* Lemma 9 of TameFJ *)
 Lemma weakening_subtyping :
@@ -20,8 +20,7 @@ Proof.
   intros tcxt tcxt' tcxt'' T T' H1 H2.
   induction H2.
   *)
-  admit.
-Qed.
+Admitted.
 
 Lemma weakening_subtyping_special_case :
   forall tcxt tcxt' T T',
@@ -42,8 +41,7 @@ Lemma context_movement :
   ok_cxt_t tcxt (tcxt' ++ tcxt'') <->
   ok_cxt_t (tcxt ++ tcxt') tcxt''.
 Proof.
-  admit.
-Qed.
+Admitted.
 
 (* Lemma 32 of TameFJ *)
 Lemma inversion_field :
@@ -100,26 +98,6 @@ Proof.
     apply subtype_t_trans with (t2 := U).
     apply Hu'.
 
-    assert ((tcxt ++ tcxt' ++ tcxt_n') = ((tcxt ++ tcxt') ++ tcxt_n')) as Heq_1.
-    SearchRewrite (( _ ++ _ ) ++ _).
-    apply app_assoc.
-    rewrite -> Heq_1.
-    
-    simpl.
-    autorewrite with list using simpl.
-    ssimpl_list.
-    reflexivity.
-    
-    apply weakening_subtyping_special_case.
-    apply Hu'.
-    
-
-      apply weakening_subtyping with
-        (tcxt:=tcxt++tcxt') (tcxt':=nil) (tcxt'':=tcxt_n')
-        (T:=U) (T':=T).
-
-  (***)
-    
     assert
       (subtype_t ((tcxt ++ tcxt') ++ tcxt_n' ++ nil) U T)
       as Hweak.
@@ -145,10 +123,7 @@ Proof.
     rewrite -> Hlisteq in Hweak.
     apply Hweak.
     (* Completed T-subs case; the last relevant case *)
-
-  (* Impossible case: typing_invk *)
-  inversion HeqHe.
 Qed.
 
-Hint Resolve inversion_field.
+#[global] Hint Resolve inversion_field : core.
 

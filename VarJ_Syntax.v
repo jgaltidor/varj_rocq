@@ -1,6 +1,6 @@
 (* Author: John Altidor
  *
- * Coq Version: 8.4
+ * Rocq Version: 9.2 (originally written for Coq 8.4)
  *
  * This is the full language definition of the VarJ calculus. 
  * I formulate VarJ using the locally-nameless binder representation. 
@@ -8,14 +8,14 @@
  * See: B. Aydemir et al. Engineering formal metatheory. 2008,
  * for more information on the locally-nameless representation. *)
 
-Require Import Arith.
-Require Export Arith.
+From Stdlib Require Import Arith.
+From Stdlib Require Export Arith.
 
-Require Import List.
-Require Export List.
+From Stdlib Require Import List.
+From Stdlib Require Export List.
 
-Require Import Metatheory.
-Require Export Metatheory.
+From VarJ Require Import Metatheory.
+From VarJ Require Export Metatheory.
 
 Set Implicit Arguments.
 
@@ -68,9 +68,9 @@ Inductive typ_r : Set :=
 | typ_r_n    : typ_n -> typ_r
 | typ_r_fvar : tname -> typ_r.
 
-Notation t_bound := (typ_b * typ).
+Abbreviation t_bound := (typ_b * typ).
 (** Represents list of lower and upper bounds of type parameters *)
-Notation t_bounds := (list t_bound).
+Abbreviation t_bounds := (list t_bound).
 
 Definition t_bound_get_lower_bound (tbnd: t_bound) :=
   let (lower, upper) := tbnd in lower.
@@ -90,6 +90,8 @@ Inductive variance : Set :=
 | invar : variance
 | bivar : variance.
 
+Declare Scope variance_scope.
+
 Notation "+" := covar     (at level 30) : variance_scope.
 Notation "-" := contravar (at level 30) : variance_scope.
 Notation "*" := bivar     (at level 30) : variance_scope.
@@ -97,8 +99,8 @@ Notation "*" := bivar     (at level 30) : variance_scope.
 (** Represents list of declared variances, lower and upper bounds
   * of class type parameboundsters
   *)
-Notation tv_bound := (variance * typ_b * typ).
-Notation tv_bounds := (list tv_bound).
+Abbreviation tv_bound := (variance * typ_b * typ).
+Abbreviation tv_bounds := (list tv_bound).
 
 
 Definition tv_bound_get_lower_bound (tvbnd: tv_bound) :=
@@ -141,11 +143,11 @@ with value_wide : list exp -> Prop :=
 (* Adding constructors for value to the core hint
  * database.
  *)
-Hint Constructors value value_wide.
+#[global] Hint Constructors value value_wide : core.
 
 (* Print HintDb core. *)
 
-Notation fielddef := (fname * typ).
+Abbreviation fielddef := (fname * typ).
 
 (** A method definition [methdef] is a map entry (a pair)
   * between a method name and 4-tuple of:
@@ -157,17 +159,17 @@ Notation fielddef := (fname * typ).
   * definitions by name in a list of methdefs.
   * Note that a methdef is a term with binders
   *)
-Notation methdef := (mname * (t_bounds * typ * list typ * exp)).
+Abbreviation methdef := (mname * (t_bounds * typ * list typ * exp)).
 
 (** Type signature of a method is a list of type bounds,
   * a list of argument types, and
   * a return type.
   * Note that a msig is a term with binders
   *)
-Notation msig := (t_bounds * list typ * typ).
+Abbreviation msig := (t_bounds * list typ * typ).
 
-Notation fielddefs := (list fielddef).
-Notation methdefs  := (list methdef).
+Abbreviation fielddefs := (list fielddef).
+Abbreviation methdefs  := (list methdef).
 
 (** A class is defined with
   * a name of the class,
@@ -177,19 +179,19 @@ Notation methdefs  := (list methdef).
   * and a list of method definitions.
   * Note that a classdef is a term with binders
   *)
-Notation classdef := (cname * tv_bounds * typ_n * fielddefs * methdefs).
+Abbreviation classdef := (cname * tv_bounds * typ_n * fielddefs * methdefs).
 
 (** A class table is mapping from names of classes to their definitions. *)
 
-Notation ctable := (list (cname * classdef)).
+Abbreviation ctable := (list (cname * classdef)).
 
 (** Type Variable Name Context *)
 
-Notation cxt_t := (list (tname * t_bound)).
+Abbreviation cxt_t := (list (tname * t_bound)).
 
 (** Expression Variable Name Context *)
 
-Notation cxt_e := (list (ename * typ)).
+Abbreviation cxt_e := (list (ename * typ)).
 
 
 Definition tvbound_var (tvbnd: tv_bound) : variance :=
@@ -213,7 +215,7 @@ Inductive VT : cname -> list variance -> Prop :=
               binds C (C, tvbnds, N, fds, mds) CT ->
               VT C (tvbounds_vars tvbnds).
 
-Hint Constructors VT.
+#[global] Hint Constructors VT : core.
 
 Definition fielddef_name (fd:fielddef) : fname :=
   let (f, _) := fd in f.
@@ -322,7 +324,7 @@ Proof.
     apply H1.
 Qed.
 
-Hint Resolve value_wide_to_forall.
+#[global] Hint Resolve value_wide_to_forall : core.
 
 Lemma value_wide_from_forall
   (* If *)
@@ -350,16 +352,13 @@ Proof.
   apply eInES.
 Qed.
 
-Lemma value_wide_iff_forall :
-  forall (es : list exp),
-    value_wide es <-> (forall e, In e es -> value e).
+(* A more explicit proof of value_wide_iff_forall:
 Proof.
   split.
   apply value_wide_to_forall.
   apply value_wide_from_forall.
 Qed.
-
-Reset value_wide_iff_forall.
+*)
 
 Lemma value_wide_iff_forall :
   forall (es : list exp),

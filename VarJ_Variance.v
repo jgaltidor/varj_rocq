@@ -1,6 +1,6 @@
 (* Variance Predicate Definitions *)
 
-Require Import VarJ_Syntax.
+From VarJ Require Import VarJ_Syntax.
 
 Close Scope nat_scope.
 
@@ -29,7 +29,7 @@ Definition var_lt (v1:variance) (v2:variance) : Prop :=
 Reserved Notation "v1 '<' v2" (at level 70, no associativity).
 Notation "v1 '<' v2" := (var_lt v1 v2).
 
-Hint Unfold var_lt.
+#[global] Hint Unfold var_lt : core.
 
 Inductive wide_var_lt : list variance -> list variance -> Prop :=
 | wide_var_lt_nil  : wide_var_lt nil nil
@@ -40,13 +40,13 @@ Inductive wide_var_lt : list variance -> list variance -> Prop :=
  (* ---------------------------------- *)
       wide_var_lt (v::vs) (v'::vs').
 
-Hint Constructors wide_var_lt.
+#[global] Hint Constructors wide_var_lt : core.
 
 Definition var_leq (v1 v2: variance) : Prop := (v1 < v2) \/ (v1 = v2).
 Reserved Notation "v1 '<=' v2" (at level 70, no associativity).
 Notation "v1 '<=' v2" := (var_leq v1 v2).
 
-Hint Unfold var_leq.
+#[global] Hint Unfold var_leq : core.
 
 Inductive wide_var_leq : list variance -> list variance -> Prop :=
 | wide_var_leq_nil  : wide_var_leq nil nil
@@ -57,7 +57,7 @@ Inductive wide_var_leq : list variance -> list variance -> Prop :=
  (* ----------------------------------- *)
       wide_var_leq (v::vs) (v'::vs').
 
-Hint Constructors wide_var_leq.
+#[global] Hint Constructors wide_var_leq : core.
 
 Definition var_transform_op (v1:variance) (v2:variance) : variance :=
   match v1 with
@@ -80,7 +80,7 @@ Definition var_transform (v1:variance) (v2:variance)
                          (v3:variance) : Prop :=
   (var_transform_op v1 v2) = v3.
 
-Hint Unfold var_transform.
+#[global] Hint Unfold var_transform : core.
 
 Definition var_meet_op (v1:variance) (v2:variance) : variance :=
   match v1 with
@@ -106,7 +106,7 @@ Definition var_meet (v1:variance) (v2:variance)
                     (v3:variance) : Prop :=
   (var_meet_op v1 v2) = v3.
 
-Hint Unfold var_meet.
+#[global] Hint Unfold var_meet : core.
 
 Definition var_meet_list_op (vs: list variance) : variance :=
   List.fold_left var_meet_op vs bivar.
@@ -114,7 +114,7 @@ Definition var_meet_list_op (vs: list variance) : variance :=
 Definition var_meet_list (vs: list variance) (v: variance) : Prop :=
  (var_meet_list_op vs) = v.
 
-Hint Unfold var_meet_list.
+#[global] Hint Unfold var_meet_list : core.
 
 Definition negateVar (v: variance) : variance :=
   var_transform_op contravar v.
@@ -146,7 +146,7 @@ Definition var_join (v1:variance) (v2:variance)
                     (v3:variance) : Prop :=
   (var_join_op v1 v2) = v3.
 
-Hint Unfold var_join.
+#[global] Hint Unfold var_join : core.
 
 Definition var_join_list_op (vs: list variance) : variance :=
   List.fold_left var_join_op vs bivar.
@@ -154,7 +154,7 @@ Definition var_join_list_op (vs: list variance) : variance :=
 Definition var_join_list (vs: list variance) (v: variance) : Prop :=
  (var_join_list_op vs) = v.
 
-Hint Unfold var_join_list.
+#[global] Hint Unfold var_join_list : core.
 
 Definition wide_var_transform_op (vs1 vs2: list variance) : list variance :=
   List.map
@@ -289,13 +289,13 @@ Inductive var_p : tname -> typ_p -> variance -> Prop :=
  (* --------------------------- *)
       var_t X t v -> var_p X (p_typ t) v.
 
-Hint Constructors var_t
+#[global] Hint Constructors var_t
                   var_n
                   var_b
                   var_t_bound
                   var_t_bounds
                   var_ts
-                  var_p.
+                  var_p : core.
 
 Inductive mono_b : list variance -> list tname -> typ_b -> Prop :=
 | mono_b_nil : forall b, mono_b nil nil b
@@ -306,19 +306,19 @@ Inductive mono_b : list variance -> list tname -> typ_b -> Prop :=
       mono_b vs xs b ->
       mono_b (v::vs) (x::xs) b.
 
-Hint Constructors mono_b.
+#[global] Hint Constructors mono_b : core.
 
 Definition mono_t (vs:list variance) (xs: list tname)
                   (t: typ) : Prop :=
   mono_b vs xs (b_typ t).
 
-Hint Unfold mono_t.
+#[global] Hint Unfold mono_t : core.
 
 Definition mono_n (vs:list variance) (xs: list tname)
                   (N: typ_n) : Prop :=
   mono_t vs xs (t_ext nil N).
 
-Hint Unfold mono_n.
+#[global] Hint Unfold mono_n : core.
 
 Inductive mono_t_bound : list variance -> list tname -> t_bound -> Prop :=
 | mono_t_bound_nil :
@@ -334,7 +334,7 @@ Inductive mono_t_bound : list variance -> list tname -> t_bound -> Prop :=
  (* --------------------------- *)
       mono_t_bound (v::vs) (x::xs) tbnd.
 
-Hint Constructors mono_t_bound.
+#[global] Hint Constructors mono_t_bound : core.
 
 Inductive mono_t_bound_wide : list variance -> list tname -> list t_bound -> Prop :=
 | mono_t_bound_wide_nil :
@@ -349,7 +349,7 @@ Inductive mono_t_bound_wide : list variance -> list tname -> list t_bound -> Pro
  (* ---------------------------------------- *)
       mono_t_bound_wide vs xs (tbnd::tbnds).
 
-Hint Constructors mono_t_bound_wide.
+#[global] Hint Constructors mono_t_bound_wide : core.
 
 Inductive mono_t_wide : list variance -> list tname -> list typ -> Prop :=
 | mono_t_wide_nil :
@@ -373,7 +373,7 @@ Inductive wide_var_b : list tname -> list typ_b -> list variance -> Prop :=
  (* --------------------------------------- *)
       wide_var_b (x::xs) (b::bs) (v::vs).
 
-Hint Constructors wide_var_b.
+#[global] Hint Constructors wide_var_b : core.
 
 Inductive wide_var_t : list tname -> list typ -> list variance -> Prop :=
 | wide_var_t_nil : wide_var_t nil nil nil
@@ -384,7 +384,7 @@ Inductive wide_var_t : list tname -> list typ -> list variance -> Prop :=
  (* --------------------------------------- *)
       wide_var_t (x::xs) (t::ts) (v::vs).
 
-Hint Constructors wide_var_t.
+#[global] Hint Constructors wide_var_t : core.
 
 Inductive wide_var_n : list tname -> list typ_n -> list variance -> Prop :=
 | wide_var_n_nil : wide_var_n nil nil nil
@@ -395,7 +395,7 @@ Inductive wide_var_n : list tname -> list typ_n -> list variance -> Prop :=
  (* --------------------------------------- *)
       wide_var_n (x::xs) (n::ns) (v::vs).
 
-Hint Constructors wide_var_n.
+#[global] Hint Constructors wide_var_n : core.
 
 Inductive wide_var_p : list tname -> list typ_p -> list variance -> Prop :=
 | wide_var_p_nil : wide_var_p nil nil nil
@@ -406,5 +406,5 @@ Inductive wide_var_p : list tname -> list typ_p -> list variance -> Prop :=
  (* --------------------------------------- *)
       wide_var_p (x::xs) (p::ps) (v::vs).
 
-Hint Constructors wide_var_p.
+#[global] Hint Constructors wide_var_p : core.
 

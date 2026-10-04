@@ -1,5 +1,5 @@
 
-Require Export String.
+From Stdlib Require Export String.
 Open Scope string_scope.
 
 (* *********************************************************************** *)
