@@ -24,7 +24,7 @@ jobs:
     # A failure on the newest release is a warning, not a broken build.
     continue-on-error: ${{ matrix.experimental }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       # The image runs as user rocq (uid 1000), which must be able to write
       # build outputs into the checkout.
