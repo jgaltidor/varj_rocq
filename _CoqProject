@@ -1,7 +1,6 @@
 -Q . VarJ
 
-Atom.v
-Metatheory.v
+VarJ_Env.v
 VarJ_Syntax.v
 VarJ_OpenClose.v
 VarJ_Substitution.v

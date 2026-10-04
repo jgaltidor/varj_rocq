@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A Coq encoding of **VarJ**, a Featherweight-Java-style calculus with definition-site variance annotations, use-site variance via existential types, and wildcard capture. Binders use the **locally nameless** representation (Aydemir et al., *Engineering Formal Metatheory*, 2008). The encoding is incomplete. Per the author's notes (`archive/notes.txt`), work stopped once the encoding approach was validated, and parts would need refactoring before soundness proofs could be finished.
+A Rocq (formerly Coq) encoding of **VarJ**, a Featherweight-Java-style calculus with definition-site variance annotations, use-site variance via existential types, and wildcard capture. Binders use the **locally nameless** representation (Aydemir et al., *Engineering Formal Metatheory*, 2008). The encoding is incomplete. Per the author's notes (`archive/notes.txt`), work stopped once the encoding approach was validated, and parts would need refactoring before soundness proofs could be finished.
 
 ## Building
 
@@ -30,8 +30,8 @@ There are no tests. "Passing" means every `.v` file compiles. The unfinished pro
 
 All modules are flat in the repo root. The dependency chain, bottom to top:
 
-1. **Infrastructure (borrowed, not VarJ-specific)**: `Atom.v` (atoms are `nat`, plus freshness) and `Metatheory.v` (association-list environments: `binds`, `dom`, `ok`, and the `\in`/`\notin`/`==` notations, from De Fraine's Cast-Free FJ development).
-2. **`VarJ_Syntax.v`**: all syntax. It re-exports `Metatheory`, `List`, and `Arith`, so every other VarJ module just `Require Import VarJ_Syntax`. Key points:
+1. **`VarJ_Env.v`**: names and environments, built only on the standard library. Atoms are `nat` (`==` is `Nat.eq_dec`, freshness via `list_max`). Environments are ordered association lists with `get` (first match), `binds`, `no_binds`, `dom` (`map fst`), and the `\in`/`\notin` notations. Keep environments as lists: rules depend on order, for example `combine (dom fds) es` in reduction, and opening binders with `dom tcxt`.
+2. **`VarJ_Syntax.v`**: all syntax. It re-exports `VarJ_Env`, `List`, and `Arith`, so every other VarJ module just `Require Import VarJ_Syntax`. Key points:
    - Types are a mutual inductive: `typ` (existential `t_ext`, bound var `t_bvar level index`, free var `t_fvar`), `typ_n` (class type `n_typ C ts`), and `typ_b` (lower bound or `b_bot`). Bound variables are **two-indexed**: binder depth, then position within that binder's parameter list, because binders introduce lists of variables.
    - `typ_p` adds `p_inf` (inferred type argument). `typ_r` is an "opened" type body.
    - Class tables, method/field defs, and contexts (`cxt_t` for type variables with bounds, `cxt_e` for expression variables) are `Abbreviation`s over tuples and lists, not inductives.

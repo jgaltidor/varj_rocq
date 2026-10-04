@@ -34,7 +34,7 @@ The build is driven by `_CoqProject`, which maps the repository root to the logi
 
 | File | Contents |
 | --- | --- |
-| `Atom.v`, `Metatheory.v` | Generic infrastructure: atoms and freshness, association-list environments |
+| `VarJ_Env.v` | Atoms (natural numbers), freshness, and ordered association-list environments |
 | `VarJ_Syntax.v` | Types, expressions, class tables, and contexts |
 | `VarJ_OpenClose.v`, `VarJ_Substitution.v` | Locally nameless opening, local closure, and substitution |
 | `VarJ_Variance.v` | The variance lattice and the variance-of-a-type judgment |
@@ -52,8 +52,8 @@ The encoding was written for Coq 8.4 between 2013 and 2015, and was ported to Ro
 
 ## Credits
 
-`Atom.v` is by Arthur Charguéraud and Brian Aydemir. `Metatheory.v` comes from Bruno De Fraine's Cast-Free Featherweight Java development. The VarJ encoding is by John Altidor.
+The VarJ encoding is by John Altidor. Earlier versions used `Atom.v` (Arthur Charguéraud and Brian Aydemir) and `Metatheory.v` (Bruno De Fraine's Cast-Free Featherweight Java development) for names and environments. These were replaced by `VarJ_Env.v` in 2026.
 
 ## License
 
-The VarJ files are released under the MIT License; see [LICENSE](LICENSE). `Atom.v` and `Metatheory.v` are third-party files that keep their original authors' terms.
+Released under the MIT License; see [LICENSE](LICENSE). The `archive/` folder holds earlier snapshots that include third-party files under their original authors' terms.

@@ -20,14 +20,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
--------------------------------------------------------------------------------
-
-Third-party files
-
-The following files are adapted from other developments. Their original
-authors retain copyright, and the license above does not apply to them:
-
-- Atom.v: by Arthur Chargueraud and Brian Aydemir, from the University of
-  Pennsylvania metatheory library (see https://github.com/plclub/metalib).
-- Metatheory.v: by Bruno De Fraine, with help from Erik Ernst and Mario
-  Sudholt, from the Cast-Free Featherweight Java development (2008).

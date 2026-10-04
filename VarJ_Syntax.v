@@ -14,8 +14,8 @@ From Stdlib Require Export Arith.
 From Stdlib Require Import List.
 From Stdlib Require Export List.
 
-From VarJ Require Import Metatheory.
-From VarJ Require Export Metatheory.
+From VarJ Require Import VarJ_Env.
+From VarJ Require Export VarJ_Env.
 
 Set Implicit Arguments.
 
