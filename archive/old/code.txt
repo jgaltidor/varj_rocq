@@ -1,0 +1,254 @@
+Fixpoint var_t_op (x: tname) (t:typ) : variance :=
+  let var_t_bound_op :=
+    fun (tbnd:t_bound) =>
+      let (b, t) := tbnd in
+        var_meet_op (negateVar (var_b_op x b)) (var_t_op x t)
+  in
+  let var_t_bounds_op :=
+      fun (tbnds:t_bounds) =>
+        let vars := List.map var_t_bound_op tbnds in
+          var_meet_list_op vars
+  in
+  match t with
+    | t_fvar y => if x == y then covar else bivar
+    | t_bivar _ _ => bivar
+    | t_ext tbnds N =>
+        var_meet_op (var_t_bounds x tbnds) (var_n x N)
+  end
+
+with var_n (x: tname) (N:typ_n) : variance :=
+  match N with n_typ C ts' =>
+    match
+    
+
+
+------
+    
+    
+Eval simpl in 1::2::nil.
+
+Example distinct_test : (distinct (1::2::nil) 0 nil).
+Proof.
+apply distinct_nil.
+Qed.
+
+
+Eval simpl in
+  combine (combine (1::2::nil) (1::2::nil)) (1::2::nil).
+
+
+    
+Lemma morganlaw : forall P Q,  ~(P \/ Q) -> ~P /\ ~Q.
+Proof.
+  intros P Q H.
+  auto.
+  (*
+  split.
+    contradict H. left. apply H.
+    contradict H. right. apply H.
+  *)
+Qed.
+    
+    
+    
+Definition var_t_xs (xs: list tname) (t:typ) (vs:list variance): Prop :=
+  let ts := List.map (fun X => t) xs in
+  wide_var_t xs ts vs.
+
+Definition var_b_xs (xs: list tname) (b:typ_b) (vs:list variance): Prop :=
+  let bs := List.map (fun X => b) xs in
+  wide_var_b xs bs vs.
+
+Definition var_p_xs (xs: list tname) (p:typ_p) (vs:list variance): Prop :=
+  let ps := List.map (fun X => p) xs in
+  wide_var_p xs ps vs.
+
+Definition var_n_xs (xs: list tname) (n:typ_n) (vs:list variance): Prop :=
+  let ns := List.map (fun X => n) xs in
+  wide_var_n xs ns vs.
+    
+
+
+(*
+Lemma demorgan_and : forall P Q,  ~P -> ~Q -> ~(P \/ Q).
+Proof.
+  intros P Q H1 H2.
+  assert (~P /\ ~Q) as H'.
+  auto.
+  contradict H'.
+  destruct H'.
+    contradict H1.
+    apply H.
+  
+    contradict H2.
+    apply H.
+Qed.
+
+
+Lemma distinct_resultnotin (A:Type):
+  forall L n xs,
+  distinct L n xs ->
+  (forall (y:A), In y xs -> ~(In y L)) /\
+  (length xs) = n.
+Proof.
+  intros L n xs H.
+  split.
+    intros y yInxs.
+    induction H.
+    contradict yInxs.
+    
+    simpl In in yInxs.
+    case yInxs.
+    intros Hy_eq_x.
+    rewrite <- Hy_eq_x.
+    apply H.
+
+    intros yInxs'.
+    apply IHdistinct in yInxs'.
+    simpl In in yInxs'.
+    assert (~(x = y) /\ ~(y \in L)) as H'.
+    auto.
+    apply H'.
+
+
+    induction H.
+    reflexivity.
+    simpl.
+    rewrite -> IHdistinct.
+    reflexivity.
+Qed.
+*)
+
+(*
+Lemma distinct_order_irrelevant (A:Type) :
+  forall (x:A) (y:A) (L:list A) (n:nat) (xs:list A),
+  distinct (x::y::L) n xs ->
+  distinct (y::x::L) n xs.
+Proof.
+  intros x y L n xs H.
+  induction xs.
+    inversion H.
+    apply distinct_nil.
+
+    
+  
+  apply distinct_nil.
+
+  auto.
+  
+  apply distinct_cons.
+
+  
+  auto.
+*)
+
+(*
+Lemma distinct_extension (A:Type) :
+  forall (L:list A) n xs (y:A),
+  distinct L n xs ->
+  ~(In y xs) ->
+  ~(In y L) ->
+  distinct (y::L) n xs.
+Proof.
+  intros L n xs y H1 H2 H3.
+  induction H1.
+
+  apply distinct_nil.
+
+  simpl In in H2.
+  assert (~(x = y) /\ ~(y \in xs)) as H2'.
+  auto.
+
+  apply distinct_cons.
+  simpl In.
+  apply demorgan_and.
+  auto.
+  apply H.
+
+  auto.
+
+  apply IHdistinct.
+  
+
+  simpl In in H2.
+  unfold not in H2.
+  simpl.
+  unfold not.
+  simpl In.
+  intros H'.
+  contradict H'.
+
+  simpl In in H2.
+  unfold not in H2.
+  simpl In in H2.
+
+  contradict H.
+  
+
+  assert (x <> x0) as H'.
+  unfold not in H2.
+  simpl In in H2.
+
+  unfold not.
+  simpl In.
+  unfold not in H2.
+  simpl In in H2.
+  intro 
+
+  unfold not in H2.
+  simpl In in H2.
+  unfold not.
+  simpl.
+  unfold not in H.
+  unfold not in H2.
+  simpl In in H2.
+  apply H.
+  apply 
+
+  contradict in H2.
+  unfold not in H2.
+  simpl H2.
+  unfold not in H2.
+  unfold not.
+  simpl.
+  
+
+Qed.
+*)
+
+(*
+Lemma fresh_and_distinct : forall L n xs,
+  xs = fresh_list L n ->
+  distinct L n xs.
+Proof.
+    admit.
+Qed.
+*)
+
+
+Definition t_bounds_get_lower_bounds (tbnds: t_bounds) :=
+  match tbnds with t_bnds _ bounds =>
+    vmap t_bound_get_lower_bound bounds
+  end.
+  
+Definition methdef_name (md:methdef) : mname :=
+  let (m, _) := md in m.
+
+Definition methdefs_names {n} (mds:methdefs) : (Vec mname n) :=
+  vmap methdef_name mds.
+
+Definition methdef_msig (md:methdef) : msig :=
+  match md with (_, (tbnds, t, ts, _)) => (tbnds, ts, t) end.
+
+Definition cxt_t_entry_name (entry:tname * t_bound) : tname :=
+  let (name, bnd) := entry in name.
+
+Definition cxt_e_entry_name (entry:ename * typ) : ename :=
+  let (name, t) := entry in name.
+
+with fv_t_bounds {n} (tbnds: t_bounds n) {struct tbnds} : list tname :=
+  match tbnds with
+    | (B, T)::tbnds' =>
+        (fv_b B) ++ (fv_t T) ++ (fv_t_bounds tbnds')
+    | nil => List.nil
+  end
