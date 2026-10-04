@@ -10,7 +10,7 @@ VarJ builds on TameFJ (Cameron, Drossopoulou, and Ernst, *A Model for Java with 
 
 ## Status
 
-This is an incomplete, exploratory development. It defines the full language: syntax, opening and substitution, variance, subtyping, well-formedness, typing, and reduction. It also proves a few metatheory lemmas. It does not prove type soundness, and two weakening lemmas are left `Admitted`. `archive/notes.txt` records the design issues that remained open when work stopped.
+This is an incomplete, exploratory development. It defines the full language: syntax, opening and substitution, variance, subtyping, well-formedness, typing, and reduction. It also proves a few metatheory lemmas. It does not prove type soundness, and two weakening lemmas are left `Admitted`. The design notes that list the issues still open when work stopped are in the repo history: `git show dd6e750:archive/notes.txt`.
 
 ## Building
 
@@ -44,7 +44,6 @@ The build is driven by `_CoqProject`, which maps the repository root to the logi
 | `VarJ_Typing.v` | Expression, method, and class typing |
 | `VarJ_Reduction.v` | Small-step reduction |
 | `VarJ_Lemmas.v` | Metatheory lemmas (weakening, inversion) |
-| `archive/` | Design notes and earlier snapshots; not part of the build |
 
 ## History
 
@@ -56,4 +55,4 @@ The VarJ encoding is by John Altidor. Earlier versions used `Atom.v` (Arthur Cha
 
 ## License
 
-Released under the MIT License; see [LICENSE](LICENSE). The `archive/` folder holds earlier snapshots that include third-party files under their original authors' terms.
+Released under the MIT License; see [LICENSE](LICENSE).

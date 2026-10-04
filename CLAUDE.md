@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A Rocq (formerly Coq) encoding of **VarJ**, a Featherweight-Java-style calculus with definition-site variance annotations, use-site variance via existential types, and wildcard capture. Binders use the **locally nameless** representation (Aydemir et al., *Engineering Formal Metatheory*, 2008). The encoding is incomplete. Per the author's notes (`archive/notes.txt`), work stopped once the encoding approach was validated, and parts would need refactoring before soundness proofs could be finished.
+A Rocq (formerly Coq) encoding of **VarJ**, a Featherweight-Java-style calculus with definition-site variance annotations, use-site variance via existential types, and wildcard capture. Binders use the **locally nameless** representation (Aydemir et al., *Engineering Formal Metatheory*, 2008). The encoding is incomplete. Per the author's design notes (`git show dd6e750:archive/notes.txt`), work stopped once the encoding approach was validated, and parts would need refactoring before soundness proofs could be finished.
 
 ## Building
 
@@ -43,11 +43,11 @@ All modules are flat in the repo root. The dependency chain, bottom to top:
 
 ### Conventions
 
-- **`wide_*` judgments** lift a judgment pointwise over lists, for example `wide_ftype`, `wide_typing`, and `wide_var_lt`. The author chose these deliberately over `In`-based premises (see `archive/notes.txt`), so follow the same pattern when adding list-level rules.
+- **`wide_*` judgments** lift a judgment pointwise over lists, for example `wide_ftype`, `wide_typing`, and `wide_var_lt`. The author chose these deliberately over `In`-based premises (see the design notes), so follow the same pattern when adding list-level rules.
 - Every inductive judgment is followed by a `Hint Constructors`, and some get `Hint Extern` entries so `auto`/`eauto` can search them. Watch for cyclic hints: a past commit had to remove a lemma from the hint database because `eauto` looped.
 - `Close Scope nat_scope` in `VarJ_Syntax.v` makes `*` mean the product type, not multiplication.
 
-## History and archive
+## History
 
 - `master` is the only branch. The early history was imported from SVN. An abandoned experiment with length-indexed vectors instead of lists was deleted: a single judgment form over lists of different lengths fits the encoding better.
-- `archive/` holds design notes and older snapshots that predate the repo. `archive/notes.txt` records the encoding's open design issues. Nothing in the build references `archive/`.
+- Commit `dd6e750` is the last one with `archive/`, which held design notes and pre-repo snapshots of the encoding.
