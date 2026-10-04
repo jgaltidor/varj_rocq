@@ -8,7 +8,7 @@ A Rocq (formerly Coq) encoding of **VarJ**, a Featherweight-Java-style calculus 
 
 ## Building
 
-The code targets **Rocq 9.2**. It was ported from Coq 8.4, and the last Coq 8.4 version is commit `6f11afb`. Rocq is not installed on the host. Build inside the devcontainer (`.devcontainer/`, image `rocq/rocq-prover:9.2`, amd64-only so it runs emulated on Apple Silicon), or run a one-off build with:
+The code targets **Rocq 9.2**. It was ported from Coq 8.4, and the last Coq 8.4 version is commit `6f11afb`. Rocq is not installed on the host. Build inside the devcontainer (`.devcontainer/Dockerfile`: `rocq/rocq-prover:9.2` plus the `vsrocq-language-server` opam package for the VsRocq extension; amd64-only, so it runs emulated on Apple Silicon), or run a one-off build with:
 
     docker run --rm --platform linux/amd64 -v "$PWD":/w -w /w rocq/rocq-prover:9.2 make
 
@@ -26,6 +26,8 @@ There are no tests. "Passing" means every `.v` file compiles and `make check` su
 - Imports are qualified: `From VarJ Require Import VarJ_Syntax.` and `From Stdlib Require Import List.`
 - Hints declared outside a section use `#[global] Hint ... : core.`, which keeps the Coq 8.4 behaviour where hints were visible to every file that imports the module.
 - Type abbreviations in `VarJ_Syntax.v` use `Abbreviation`, not `Notation`. This keyword needs Rocq 9.2 or later.
+- The variance orderings `<` and `<=` live in `variance_scope` (delimited by `%var`) and are opened only locally in `VarJ_Variance.v`. Elsewhere, write `(v1 < v2)%var`. `VarJ_Syntax.v` closes `nat_scope`, and that carries into importing files, so write `(1 < 2)%nat` or open `nat_scope` where you need numbers.
+- `QUICKSTART.md` is the human-facing setup and tour. Keep it in sync when the build or layout changes.
 
 ## Architecture
 

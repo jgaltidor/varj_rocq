@@ -16,7 +16,9 @@ This is an incomplete, exploratory development. It defines the full language: sy
 
 ## Building
 
-You need Rocq 9.2 or later. The easiest way to get it is the included devcontainer (`.devcontainer/`), which uses the official `rocq/rocq-prover:9.2` image. Without a devcontainer, Docker alone works:
+New here? Start with the [quick start guide](QUICKSTART.md).
+
+You need Rocq 9.2 or later. The easiest way to get it is the included devcontainer (`.devcontainer/`), which builds on the official `rocq/rocq-prover:9.2` image and adds the VsRocq language server. Without a devcontainer, Docker alone works:
 
 ```sh
 docker run --rm --platform linux/amd64 -v "$PWD":/w -w /w rocq/rocq-prover:9.2 make
