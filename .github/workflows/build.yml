@@ -14,8 +14,8 @@ jobs:
 
       # The image runs as user rocq (uid 1000), which must be able to write
       # build outputs into the checkout.
-      - name: Give the container user ownership of the checkout
-        run: sudo chown -R 1000:1000 .
+      - name: Let the container user write to the checkout
+        run: chmod -R a+w .
 
       - name: Build with Rocq 9.2
         run: docker run --rm -v "$PWD":/w -w /w rocq/rocq-prover:9.2 make
