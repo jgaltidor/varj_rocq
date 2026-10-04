@@ -47,7 +47,7 @@ All modules are flat in the repo root. The dependency chain, bottom to top:
 - Every inductive judgment is followed by a `Hint Constructors`, and some get `Hint Extern` entries so `auto`/`eauto` can search them. Watch for cyclic hints: a past commit had to remove a lemma from the hint database because `eauto` looped.
 - `Close Scope nat_scope` in `VarJ_Syntax.v` makes `*` mean the product type, not multiplication.
 
-## Branches and archive
+## History and archive
 
-- Besides `master`, the repo has several experiment branches (`varj_coq-vector*`, `vector`, `varj_coq_extbody`, `varj_coq-refactor`, `varj_coq-var-compute`, `varj_coq_locallynameless`) that explore alternative encodings, such as length-indexed vectors instead of lists. The early history was imported from SVN.
+- `master` is the only branch. The early history was imported from SVN. An abandoned experiment with length-indexed vectors instead of lists was deleted: a single judgment form over lists of different lengths fits the encoding better.
 - `archive/` holds design notes and older snapshots that predate the repo. `archive/notes.txt` records the encoding's open design issues. Nothing in the build references `archive/`.

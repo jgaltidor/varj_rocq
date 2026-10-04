@@ -48,7 +48,7 @@ The build is driven by `_CoqProject`, which maps the repository root to the logi
 
 ## History
 
-The encoding was written for Coq 8.4 between 2013 and 2015, and was ported to Rocq 9.2 in 2026. The last Coq 8.4 version is commit `6f11afb`. The other branches hold experiments with alternative encodings, such as length-indexed vectors instead of lists.
+The encoding was written for Coq 8.4 between 2013 and 2015, and was ported to Rocq 9.2 in 2026. The last Coq 8.4 version is commit `6f11afb`.
 
 ## Credits
 
