@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this mechanization, please cite the paper that defines VarJ."
+title: "varj_rocq: a Rocq mechanization of VarJ"
+type: software
+authors:
+  - family-names: Altidor
+    given-names: John
+repository-code: "https://github.com/jgaltidor/varj_rocq"
+license: MIT
+keywords:
+  - Rocq
+  - Coq
+  - variance
+  - Java generics
+  - locally nameless
+preferred-citation:
+  type: conference-paper
+  title: "Java Wildcards Meet Definition-Site Variance"
+  authors:
+    - family-names: Altidor
+      given-names: John
+    - family-names: Reichenbach
+      given-names: Christoph
+    - family-names: Smaragdakis
+      given-names: Yannis
+  collection-title: "ECOOP 2012 – Object-Oriented Programming"
+  conference:
+    name: "European Conference on Object-Oriented Programming (ECOOP)"
+  year: 2012
