@@ -26,8 +26,13 @@ Definition var_lt_op (v1:variance) (v2:variance) : bool :=
 
 Definition var_lt (v1:variance) (v2:variance) : Prop :=
   (var_lt_op v1 v2) = true.
-Reserved Notation "v1 '<' v2" (at level 70, no associativity).
-Notation "v1 '<' v2" := (var_lt v1 v2).
+(* The variance orderings are written < and <= inside variance_scope
+   (delimited by %var), so importing this file leaves < and <= on numbers
+   unchanged. *)
+Declare Scope variance_scope.
+Delimit Scope variance_scope with var.
+Notation "v1 < v2" := (var_lt v1 v2) : variance_scope.
+Local Open Scope variance_scope.
 
 #[global] Hint Unfold var_lt : core.
 
@@ -43,8 +48,7 @@ Inductive wide_var_lt : list variance -> list variance -> Prop :=
 #[global] Hint Constructors wide_var_lt : core.
 
 Definition var_leq (v1 v2: variance) : Prop := (v1 < v2) \/ (v1 = v2).
-Reserved Notation "v1 '<=' v2" (at level 70, no associativity).
-Notation "v1 '<=' v2" := (var_leq v1 v2).
+Notation "v1 <= v2" := (var_leq v1 v2) : variance_scope.
 
 #[global] Hint Unfold var_leq : core.
 
